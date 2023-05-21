@@ -1,6 +1,6 @@
 import sql from "mssql";
 
-const sqlConfig: sql.config = {
+export const sqlConfig: sql.config = {
      user: process.env.DB_USER,
      password: process.env.DB_PWD,
      database: process.env.DB_NAME,
@@ -16,12 +16,3 @@ const sqlConfig: sql.config = {
           trustServerCertificate: process.env.NODE_ENV === "production" ? false : true, // change to true for local dev / self-signed certs
      },
 };
-
-export async function sqlConnection() {
-     try {
-          await sql.connect(sqlConfig);
-          return sql;
-     } catch (error) {
-          console.log("Error while connecting to database. ", error);
-     }
-}
