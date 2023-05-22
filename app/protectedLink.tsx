@@ -1,17 +1,17 @@
-"use client";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./configuration/authOptions";
 
-export default function ProtectedLink(): JSX.Element | null {
-     const session = useSession();
-     if (session.status === "authenticated")
-          return (
-               <Link
-                    href={"/protected"}
-                    className="text-center"
-               >
-                    Suojatulle sivulle
-               </Link>
-          );
-     return null;
+export default async function ProtectedLink(): Promise<JSX.Element | null> {
+     const session = await getServerSession(authOptions);
+
+     if (!session) return null;
+     return (
+          <Link
+               href={"/protected"}
+               className="text-center"
+          >
+               Suojatulle sivulle
+          </Link>
+     );
 }

@@ -18,6 +18,13 @@ export default function User(): JSX.Element | null {
           };
      }, [session]);
 
+     if (status === "loading")
+          return (
+               <div className="text-center">
+                    <p>Ladataan...</p>
+               </div>
+          );
+
      if (status === "unauthenticated")
           return (
                <div className="text-center">
