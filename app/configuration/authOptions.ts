@@ -41,7 +41,7 @@ export const authOptions = {
                     }
                }
 
-               if (token.aadObjectId) {
+               if (token.aadObjectId && process.env.NODE_ENV === "development") {
                     session.user.isExistingUser = await checkIfUserExists(token.aadObjectId);
                     ///todo: Jos edellinen false, luo käyttäjä kantaan ja palauta sitten sessioon true
                     ///todo: try-catchit olis kivat, niin voisi palauttaa sessioon oikean errorin, jos vaikka accestoken on vanhentunut
