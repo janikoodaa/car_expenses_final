@@ -9,7 +9,8 @@ export default function Home(): JSX.Element {
                <User />
                {/* @ts-expect-error Async Server Component */}
                <ProtectedLink />
-               {/* <UserInfo /> */}
+               {/* @ts-expect-error Async Server Component */}
+               <UserInfo />
           </div>
      );
 }
