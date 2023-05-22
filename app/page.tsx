@@ -7,7 +7,8 @@ export default function Home(): JSX.Element {
           <div className="mt-4 flex columns-1 flex-col gap-4">
                <p className="text-center text-blue-700">Tästä tulee sovellus, jolla voi seurata auton kuluja ja ennustaa tulevia kuluja.</p>
                <User />
-               {/* <ProtectedLink /> */}
+               {/* @ts-expect-error Async Server Component */}
+               <ProtectedLink />
                {/* <UserInfo /> */}
           </div>
      );
