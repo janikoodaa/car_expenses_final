@@ -8,9 +8,9 @@ export default function Home(): JSX.Element {
                <p className="text-center text-blue-700">Tästä tulee sovellus, jolla voi seurata auton kuluja ja ennustaa tulevia kuluja.</p>
                <User />
                {/* @ts-expect-error Async Server Component */}
-               <ProtectedLink />
+               {/* <ProtectedLink /> */}
                {/* @ts-expect-error Async Server Component */}
-               <UserInfo />
+               {/* <UserInfo /> */}
           </div>
      );
 }
