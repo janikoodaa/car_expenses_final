@@ -1,9 +1,7 @@
-import { Client } from "@microsoft/microsoft-graph-client";
 import { Profile, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
-import sql from "mssql";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import { sqlConfig } from "./azureSQLConfiguration";
+import { getUserFromGraph, checkIfUserExists, SaveNewUser } from "../dataRepository/userDataOperations";
 
 export const authOptions = {
      providers: [
@@ -21,34 +19,62 @@ export const authOptions = {
      ],
      callbacks: {
           async jwt({ token, profile, account }: { token: JWT; profile?: Profile | undefined; account?: Account | null }): Promise<JWT> {
+               // console.log("Entering async jwt()...");
+               // console.log("token in async jwt: ", token);
+               // console.log("token expires: ", new Date(token.accessTokenExpires));
+               // console.log("token error in async jwt: ", token.error);
                // console.log("account: ", account);
+               // if (token) console.log("token exists in async jwt(), ", token);
+
                if (profile && account) {
+                    const graphData: GraphResponse = await getUserFromGraph(account.access_token!);
+                    if (graphData.status === "ok") {
+                         const userFromGraph: UserFromGraph = graphData.data!;
+                         token.firstName = userFromGraph.givenName!;
+                         token.lastName = userFromGraph.surname!;
+                         token.initials = userFromGraph.givenName!.substring(0, 1) + userFromGraph.surname!.substring(0, 1);
+                    } else {
+                         console.error("Error getting user data from Graph. ", graphData.error);
+                         token.firstName = "";
+                         token.lastName = "";
+                         token.initials = "";
+                         token.error = "Error getting user data from Graph.";
+                    }
+
+                    const isExistingUser: UserCheckResponse = await checkIfUserExists(profile.oid!);
+
+                    if (isExistingUser.status === "ok" && !isExistingUser.data?.isExistingUser) {
+                         const saveResult: DataResponse = await SaveNewUser(profile.oid!);
+
+                         if (saveResult.status === "error") {
+                              console.error("Saving new user failed. ", saveResult.error);
+                              token.error += " Saving new user failed.";
+                         }
+                    } else if (isExistingUser.status === "error") {
+                         console.error("Could not check, if user is already existing. ", isExistingUser.error);
+                         token.error += " Could not check, if user is already existing.";
+                    }
+
                     token.aadObjectId = profile.oid;
                     token.aadUsername = profile.preferred_username;
                     token.accessToken = account.access_token!;
                     token.accessTokenExpires = account.expires_at!;
                     token.refreshToken = account.refresh_token!;
                }
+
+               // console.log("JWT token: ", token);
+               // console.log("Exiting async jwt()...");
                return refreshAccessToken(token);
           },
           async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
-               if (token.accessToken) {
-                    const userFromGraph: UserFromGraph | undefined = await getUserFromGraph(token.accessToken);
-                    if (userFromGraph?.givenName && userFromGraph?.surname) {
-                         session.user.firstName = userFromGraph.givenName;
-                         session.user.lastName = userFromGraph.surname;
-                         session.user.initials = userFromGraph.givenName.substring(0, 1) + userFromGraph.surname.substring(0, 1);
-                    }
-               }
+               // console.log("Setting data from token to session.");
 
-               if (token.aadObjectId && process.env.NODE_ENV === "development") {
-                    session.user.isExistingUser = await checkIfUserExists(token.aadObjectId);
-                    ///todo: Jos edellinen false, luo käyttäjä kantaan ja palauta sitten sessioon true
-                    ///todo: try-catchit olis kivat, niin voisi palauttaa sessioon oikean errorin, jos vaikka accestoken on vanhentunut
-               }
-
+               session.user.firstName = token.firstName;
+               session.user.lastName = token.lastName;
+               session.user.initials = token.initials;
                session.user.aadUsername = token.aadUsername!;
                session.error = token.error;
+
                return session;
           },
      },
@@ -56,7 +82,8 @@ export const authOptions = {
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
      // Refresh accessToken only only if it's expired
-     if (token.accessTokenExpires * 1000 <= Date.now()) {
+     if (new Date(token.accessTokenExpires) <= new Date()) {
+          // console.log("trying to refresh the accesstoken");
           try {
                const url = `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/oauth2/v2.0/token`;
                const response = await fetch(url, {
@@ -72,7 +99,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
                });
 
                const newTokens = await response.json();
-
+               // console.log("new token in refreshing accesstoken: ", newTokens);
                return {
                     ...token,
                     accessToken: newTokens.access_token,
@@ -89,32 +116,4 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
           }
      }
      return token;
-}
-
-async function getUserFromGraph(accessToken: string): Promise<UserFromGraph | undefined> {
-     try {
-          const client = Client.init({
-               authProvider: (done) => {
-                    done(null, accessToken);
-               },
-          });
-          const rawUserFromGraph: {} | undefined = await client.api("/me").get();
-          // console.log("userFromGraph: ", rawUserFromGraph);
-          const userFromGraph: UserFromGraph | undefined = rawUserFromGraph;
-          return userFromGraph;
-     } catch (error) {
-          console.error("Error getting user info from Graph!");
-          return undefined;
-     }
-}
-
-async function checkIfUserExists(aadObjectId: string): Promise<boolean | undefined> {
-     try {
-          await sql.connect(sqlConfig);
-          const usersFound = (await sql.query(`select count(1) user_count from CarExpenses.[User] where AzureAdId = '${aadObjectId}'`)).recordset;
-          return usersFound[0].user_count === 1;
-     } catch (error) {
-          console.error("Error while connecting to database. ", error);
-          return undefined;
-     }
 }
