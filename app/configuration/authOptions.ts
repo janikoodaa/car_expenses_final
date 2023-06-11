@@ -1,7 +1,8 @@
 import { Profile, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import { getUserFromGraph, checkIfUserExists, SaveNewUser } from "../dataRepository/userDataOperations";
+import { getUser, SaveNewUser, UpdateUser } from "../lib/mongoDB/userData";
+import { getUserFromGraph } from "../lib/msGraph/getUserFromGraph";
 
 export const authOptions = {
      providers: [
@@ -35,24 +36,38 @@ export const authOptions = {
                          token.initials = userFromGraph.givenName!.substring(0, 1) + userFromGraph.surname!.substring(0, 1);
                     } else {
                          console.error("Error getting user data from Graph. ", graphData.error);
-                         token.firstName = "";
-                         token.lastName = "";
-                         token.initials = "";
+                         token.firstName = null;
+                         token.lastName = null;
+                         token.initials = null;
                          token.error = "Error getting user data from Graph.";
                     }
 
-                    const isExistingUser: UserCheckResponse = await checkIfUserExists(profile.oid!);
+                    const foundUser: UserResponse = await getUser(profile.oid!);
+                    console.log("Found User: ", foundUser);
 
-                    if (isExistingUser.status === "ok" && !isExistingUser.data?.isExistingUser) {
-                         const saveResult: DataResponse = await SaveNewUser(profile.oid!);
+                    if (foundUser.status === "error") {
+                         console.error(`Error getting user with aadObjectId ${profile.oid}. Error: ${foundUser.error}`);
+                         token.error = foundUser.error;
+                    }
+
+                    if (foundUser.status === "ok" && !foundUser.data) {
+                         const saveResult: DataResponse = await SaveNewUser({ aadObjectId: profile.oid!, aadUsername: profile.preferred_username! });
 
                          if (saveResult.status === "error") {
                               console.error("Saving new user failed. ", saveResult.error);
                               token.error += " Saving new user failed.";
                          }
-                    } else if (isExistingUser.status === "error") {
-                         console.error("Could not check, if user is already existing. ", isExistingUser.error);
-                         token.error += " Could not check, if user is already existing.";
+                    } else if (foundUser.status === "ok" && foundUser.data?.aadUsername !== profile.preferred_username) {
+                         // console.log("Need to update the user's email.");
+                         const updateResult: DataResponse = await UpdateUser({
+                              _id: foundUser.data?._id,
+                              aadObjectId: profile.oid!,
+                              aadUsername: profile.preferred_username!,
+                         });
+                         if (updateResult.status === "error") {
+                              // console.error("Updating user data failed. ", updateResult.error);
+                              token.error += " Updating user data failed.";
+                         }
                     }
 
                     token.aadObjectId = profile.oid;

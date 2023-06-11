@@ -5,6 +5,12 @@ interface UserFromGraph {
      theme: "light" | "dark";
 }
 
+interface AppUser {
+     _id?: any;
+     aadObjectId: string;
+     aadUsername: string;
+}
+
 interface DataResponse {
      status: "ok" | "error";
      data: {} | null;
@@ -17,4 +23,8 @@ interface GraphResponse extends DataResponse {
 
 interface UserCheckResponse extends DataResponse {
      data: { isExistingUser: boolean } | null;
+}
+
+interface UserResponse extends DataResponse {
+     data: AppUser | undefined | null;
 }
