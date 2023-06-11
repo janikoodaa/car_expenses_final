@@ -6,6 +6,9 @@ export default async function UserInfo(): Promise<JSX.Element | null> {
      // console.log("serverSession in UserInfo: ", serverSession);
 
      if (!serverSession) return null;
+     if (serverSession.error) {
+          throw new Error("MultipleUsersWithSameId");
+     }
      return (
           <div className="text-center">
                <p>Nimikirjaimet sessiosta: {serverSession?.user.initials}</p>

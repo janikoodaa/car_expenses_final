@@ -1,12 +1,23 @@
 "use client"; // Error components must be Client Components
 
 import { useEffect } from "react";
+import SignOutButton from "./signOutButton";
 
 export default function Error({ error, reset }: { error: Error; reset: () => void }) {
      useEffect(() => {
           // Log the error to an error reporting service
-          console.error(error);
+          console.error("Catch error: ", error);
      }, [error]);
+
+     if (error.message === "MultipleUsersWithSameId") {
+          console.log("Catch error in if: ", error.message);
+          return (
+               <div>
+                    <h2>Samalla käyttäjätunnuksella löytyy monta tiliä.</h2>
+                    <SignOutButton />
+               </div>
+          );
+     }
 
      return (
           <div>
