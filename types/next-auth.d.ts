@@ -8,7 +8,7 @@ declare module "next-auth" {
      interface Session {
           error?: string | null;
           user: {
-               isExistingUser: boolean | undefined;
+               _id: string | null;
                aadUsername: string | null;
                firstName: string | null;
                lastName: string | null;
@@ -50,6 +50,7 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
      interface JWT {
+          _id: string | null;
           name?: string | null;
           firstName: string | null;
           lastName: string | null;

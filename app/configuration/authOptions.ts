@@ -45,13 +45,17 @@ export const authOptions = {
                     const foundUser: UserResponse = await getUser(profile.oid!);
                     console.log("Found User: ", foundUser);
 
+                    let userIdInApp = foundUser.data?._id;
+
                     if (foundUser.status === "error") {
                          console.error(`Error getting user with aadObjectId ${profile.oid}. Error: ${foundUser.error}`);
                          token.error = foundUser.error;
                     }
 
                     if (foundUser.status === "ok" && !foundUser.data) {
-                         const saveResult: DataResponse = await SaveNewUser({ aadObjectId: profile.oid!, aadUsername: profile.preferred_username! });
+                         const saveResult: UserResponse = await SaveNewUser({ aadObjectId: profile.oid!, aadUsername: profile.preferred_username! });
+
+                         userIdInApp = saveResult.data?._id;
 
                          if (saveResult.status === "error") {
                               console.error("Saving new user failed. ", saveResult.error);
@@ -59,7 +63,7 @@ export const authOptions = {
                          }
                     } else if (foundUser.status === "ok" && foundUser.data?.aadUsername !== profile.preferred_username) {
                          // console.log("Need to update the user's email.");
-                         const updateResult: DataResponse = await UpdateUser({
+                         const updateResult: UserResponse = await UpdateUser({
                               _id: foundUser.data?._id,
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
@@ -70,6 +74,7 @@ export const authOptions = {
                          }
                     }
 
+                    token._id = userIdInApp;
                     token.aadObjectId = profile.oid;
                     token.aadUsername = profile.preferred_username;
                     token.accessToken = account.access_token!;
@@ -84,6 +89,7 @@ export const authOptions = {
           async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
                // console.log("Setting data from token to session.");
 
+               session.user._id = token._id;
                session.user.firstName = token.firstName;
                session.user.lastName = token.lastName;
                session.user.initials = token.initials;

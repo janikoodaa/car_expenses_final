@@ -26,7 +26,7 @@ export async function getUser(aadObjectId: string): Promise<UserResponse> {
      }
 }
 
-export async function SaveNewUser(user: AppUser): Promise<DataResponse> {
+export async function SaveNewUser(user: AppUser): Promise<UserResponse> {
      // console.log("Starting to save user");
      let saveResponse: DataResponse;
      try {
@@ -36,14 +36,14 @@ export async function SaveNewUser(user: AppUser): Promise<DataResponse> {
           const newUser = await db.collection(usersCollection).insertOne(user);
           //   console.log(`New user with oid ${newUser.insertedId} inserted.`);
 
-          return (saveResponse = { status: "ok", data: null });
+          return (saveResponse = { status: "ok", data: { ...user, _id: newUser.insertedId } });
      } catch (error: any) {
           // console.error("Error inserting new user. ", error);
           return (saveResponse = { status: "error", data: null, error: error });
      }
 }
 
-export async function UpdateUser(user: AppUser): Promise<DataResponse> {
+export async function UpdateUser(user: AppUser): Promise<UserResponse> {
      // console.log("Starting to update user");
      let saveResponse: DataResponse;
      try {
@@ -53,7 +53,7 @@ export async function UpdateUser(user: AppUser): Promise<DataResponse> {
           const updatedUser = await db.collection(usersCollection).updateOne({ _id: user._id }, { $set: { aadUsername: user.aadUsername } });
           //   console.log(`User ${updatedUser} updated.`);
 
-          return (saveResponse = { status: "ok", data: null });
+          return (saveResponse = { status: "ok", data: user });
      } catch (error: any) {
           // console.error("Error updating user. ", error);
           return (saveResponse = { status: "error", data: null, error: error });

@@ -4,26 +4,82 @@ import { authOptions } from "../configuration/authOptions";
 import SignOutButton from "../signOutButton";
 import SignInButton from "../signInButton";
 
+const navLinks = [
+     { path: "/cars", description: "Autot" },
+     { path: "/history", description: "Historia" },
+];
+
 export default async function Navbar(): Promise<JSX.Element> {
      let serverSession = await getServerSession(authOptions);
+     console.log("serverSession in UserInfo: ", serverSession);
 
+     let linksForSignedInUsers;
+     if (serverSession?.user) {
+          linksForSignedInUsers = navLinks.map((l) => {
+               return (
+                    <li className="flex h-full items-center">
+                         <Link href={l.path}>{l.description}</Link>
+                    </li>
+               );
+          });
+          // <>
+          //      <li className="flex h-full items-center">
+          //           <Link
+          //                href={"/cars"}
+          //                className=""
+          //           >
+          //                Autot
+          //           </Link>
+          //      </li>
+          //      <li className="flex h-full items-center">
+          //           <Link href={"/history"}>Historia</Link>
+          //      </li>
+          // </>
+     }
+
+     // const linksForSignedInUsers = serverSession?.user ? (
+     //      <>
+     //           <li className="flex h-full items-center">
+     //                <Link
+     //                     href={"/cars"}
+     //                     className=""
+     //                >
+     //                     Autot
+     //                </Link>
+     //           </li>
+     //           <li className="flex h-full items-center">
+     //                <Link href={"/history"}>Historia</Link>
+     //           </li>
+     //      </>
+     // ) : null;
      const signInOut = serverSession?.user ? <SignOutButton /> : <SignInButton />;
      const loggedInUser = serverSession?.user ? <Link href="/user">{serverSession.user.firstName}</Link> : null;
 
      return (
-          <nav className="flex h-14 flex-row items-center justify-between bg-slate-600 pl-4 pr-4 text-white">
-               <ul className="flex list-none flex-row gap-3">
-                    <li>
-                         <Link href={"/"}>Auton kululoki</Link>
+          <nav className="flex h-14 flex-row justify-between bg-slate-600 pl-4 pr-4 text-white">
+               <ul className="flex h-full list-none flex-row gap-3">
+                    <li className="flex h-full items-center">
+                         <Link
+                              href={"/"}
+                              className="text-xl font-bold"
+                         >
+                              Auton kululoki
+                         </Link>
                     </li>
-                    <li>
-                         <Link href={"/cars"}>Autot</Link>
+                    {linksForSignedInUsers}
+                    {/* <li className="flex h-full items-center">
+                         <Link
+                              href={"/cars"}
+                              className=""
+                         >
+                              Autot
+                         </Link>
                     </li>
-                    <li>
+                    <li className="flex h-full items-center">
                          <Link href={"/history"}>Historia</Link>
-                    </li>
+                    </li> */}
                </ul>
-               <div className="flex flex-row-reverse gap-2">
+               <div className="flex flex-row-reverse items-center gap-2">
                     {signInOut}
                     {loggedInUser}
                </div>
