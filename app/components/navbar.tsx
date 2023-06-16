@@ -15,9 +15,12 @@ export default async function Navbar(): Promise<JSX.Element> {
 
      let linksForSignedInUsers: JSX.Element[] | null = null;
      if (session) {
-          linksForSignedInUsers = navLinks.map((l) => {
+          linksForSignedInUsers = navLinks.map((l, idx) => {
                return (
-                    <li className="flex h-full items-center">
+                    <li
+                         key={idx}
+                         className="flex h-full items-center"
+                    >
                          <Link href={l.path}>{l.description}</Link>
                     </li>
                );
