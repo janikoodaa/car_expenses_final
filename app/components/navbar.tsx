@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../configuration/authOptions";
-import SignOutButton from "../signOutButton";
-import SignInButton from "../signInButton";
+import SignOutButton from "./signOutButton";
+import SignInButton from "./signInButton";
 
 const navLinks = [
      { path: "/cars", description: "Autot" },
@@ -10,11 +10,11 @@ const navLinks = [
 ];
 
 export default async function Navbar(): Promise<JSX.Element> {
-     let serverSession = await getServerSession(authOptions);
-     console.log("serverSession in UserInfo: ", serverSession);
+     let session = await getServerSession(authOptions);
+     console.log("serverSession in UserInfo: ", session);
 
-     let linksForSignedInUsers;
-     if (serverSession?.user) {
+     let linksForSignedInUsers: JSX.Element[] | null = null;
+     if (session) {
           linksForSignedInUsers = navLinks.map((l) => {
                return (
                     <li className="flex h-full items-center">
@@ -22,38 +22,10 @@ export default async function Navbar(): Promise<JSX.Element> {
                     </li>
                );
           });
-          // <>
-          //      <li className="flex h-full items-center">
-          //           <Link
-          //                href={"/cars"}
-          //                className=""
-          //           >
-          //                Autot
-          //           </Link>
-          //      </li>
-          //      <li className="flex h-full items-center">
-          //           <Link href={"/history"}>Historia</Link>
-          //      </li>
-          // </>
      }
 
-     // const linksForSignedInUsers = serverSession?.user ? (
-     //      <>
-     //           <li className="flex h-full items-center">
-     //                <Link
-     //                     href={"/cars"}
-     //                     className=""
-     //                >
-     //                     Autot
-     //                </Link>
-     //           </li>
-     //           <li className="flex h-full items-center">
-     //                <Link href={"/history"}>Historia</Link>
-     //           </li>
-     //      </>
-     // ) : null;
-     const signInOut = serverSession?.user ? <SignOutButton /> : <SignInButton />;
-     const loggedInUser = serverSession?.user ? <Link href="/user">{serverSession.user.firstName}</Link> : null;
+     const signInOut: JSX.Element = session ? <SignOutButton /> : <SignInButton />;
+     const loggedInUser: JSX.Element | null = session ? <Link href="/user">{session.user.firstName}</Link> : null;
 
      return (
           <nav className="flex h-14 flex-row justify-between bg-slate-600 pl-4 pr-4 text-white">
@@ -67,21 +39,10 @@ export default async function Navbar(): Promise<JSX.Element> {
                          </Link>
                     </li>
                     {linksForSignedInUsers}
-                    {/* <li className="flex h-full items-center">
-                         <Link
-                              href={"/cars"}
-                              className=""
-                         >
-                              Autot
-                         </Link>
-                    </li>
-                    <li className="flex h-full items-center">
-                         <Link href={"/history"}>Historia</Link>
-                    </li> */}
                </ul>
-               <div className="flex flex-row-reverse items-center gap-2">
-                    {signInOut}
+               <div className="flex flex-row items-center gap-2">
                     {loggedInUser}
+                    {signInOut}
                </div>
           </nav>
      );

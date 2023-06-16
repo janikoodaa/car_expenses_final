@@ -11,20 +11,21 @@ interface AppUser {
      aadUsername: string;
 }
 
-interface DataResponse {
+interface Vehicle {
+     _id: any;
+     type: "car" | "bicycle" | "motorcycle" | "van";
+     make: string;
+     model: string;
+     year: number;
+     registeringDate: Date;
+     fuel: "95E10" | "Diesel";
+     active: boolean;
+     owner: string;
+     coUsers: string[] | null;
+}
+
+interface DataResponse<T> {
      status: "ok" | "error";
-     data: {} | null;
+     data: T | undefined | null;
      error?: any;
-}
-
-interface GraphResponse extends DataResponse {
-     data: UserFromGraph | null;
-}
-
-interface UserCheckResponse extends DataResponse {
-     data: { isExistingUser: boolean } | null;
-}
-
-interface UserResponse extends DataResponse {
-     data: AppUser | undefined | null;
 }

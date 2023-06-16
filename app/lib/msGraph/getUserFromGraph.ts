@@ -1,7 +1,7 @@
 import { Client } from "@microsoft/microsoft-graph-client";
 
-export async function getUserFromGraph(accessToken: string): Promise<GraphResponse> {
-     let user: GraphResponse;
+export async function getUserFromGraph(accessToken: string): Promise<DataResponse<UserFromGraph>> {
+     let user: DataResponse<UserFromGraph>;
      try {
           const client = Client.init({
                authProvider: (done) => {
