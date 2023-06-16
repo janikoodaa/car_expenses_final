@@ -28,7 +28,7 @@ export const authOptions = {
                // if (token) console.log("token exists in async jwt(), ", token);
 
                if (profile && account) {
-                    const graphData: GraphResponse = await getUserFromGraph(account.access_token!);
+                    const graphData: DataResponse<UserFromGraph> = await getUserFromGraph(account.access_token!);
                     if (graphData.status === "ok") {
                          const userFromGraph: UserFromGraph = graphData.data!;
                          token.firstName = userFromGraph.givenName!;
@@ -42,7 +42,7 @@ export const authOptions = {
                          token.error = "Error getting user data from Graph.";
                     }
 
-                    const foundUser: UserResponse = await getUser(profile.oid!);
+                    const foundUser: DataResponse<AppUser> = await getUser(profile.oid!);
                     console.log("Found User: ", foundUser);
 
                     let userIdInApp = foundUser.data?._id;
@@ -53,7 +53,10 @@ export const authOptions = {
                     }
 
                     if (foundUser.status === "ok" && !foundUser.data) {
-                         const saveResult: UserResponse = await SaveNewUser({ aadObjectId: profile.oid!, aadUsername: profile.preferred_username! });
+                         const saveResult: DataResponse<AppUser> = await SaveNewUser({
+                              aadObjectId: profile.oid!,
+                              aadUsername: profile.preferred_username!,
+                         });
 
                          userIdInApp = saveResult.data?._id;
 
@@ -63,7 +66,7 @@ export const authOptions = {
                          }
                     } else if (foundUser.status === "ok" && foundUser.data?.aadUsername !== profile.preferred_username) {
                          // console.log("Need to update the user's email.");
-                         const updateResult: UserResponse = await UpdateUser({
+                         const updateResult: DataResponse<AppUser> = await UpdateUser({
                               _id: foundUser.data?._id,
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
