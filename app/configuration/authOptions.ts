@@ -1,7 +1,7 @@
 import { Profile, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import { getUser, SaveNewUser, UpdateUser } from "../lib/mongoDB/userData";
+import { getUser, saveNewUser, updateUser } from "../lib/mongoDB/userData";
 import { getUserFromGraph } from "../lib/msGraph/getUserFromGraph";
 
 export const authOptions = {
@@ -53,7 +53,7 @@ export const authOptions = {
                     }
 
                     if (foundUser.status === "ok" && !foundUser.data) {
-                         const saveResult: DataResponse<AppUser> = await SaveNewUser({
+                         const saveResult: DataResponse<AppUser> = await saveNewUser({
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
                          });
@@ -66,7 +66,7 @@ export const authOptions = {
                          }
                     } else if (foundUser.status === "ok" && foundUser.data?.aadUsername !== profile.preferred_username) {
                          // console.log("Need to update the user's email.");
-                         const updateResult: DataResponse<AppUser> = await UpdateUser({
+                         const updateResult: DataResponse<AppUser> = await updateUser({
                               _id: foundUser.data?._id,
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,

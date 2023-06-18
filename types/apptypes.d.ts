@@ -16,12 +16,17 @@ interface Vehicle {
      type: "car" | "bicycle" | "motorcycle" | "van";
      make: string;
      model: string;
+     nickName: string | null;
      year: number;
      registeringDate: Date;
-     fuel: "95E10" | "Diesel";
+     registerNumber: string;
+     inUseFrom: Date;
+     InUseTo: Date;
+     primaryFuel: "95E10" | "98E5" | "Diesel" | null;
      active: boolean;
      owner: string;
      coUsers: string[] | null;
+     image: string | "";
 }
 
 interface DataResponse<T> {

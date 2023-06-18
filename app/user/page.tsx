@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../configuration/authOptions";
-import { GetOwnedVehiclesForUser } from "../lib/mongoDB/vehicleData";
+import { getOwnedVehiclesForUser, getPrivilegedVehiclesForUser } from "../lib/mongoDB/vehicleData";
 
 export default async function User(): Promise<JSX.Element> {
      const session = await getServerSession(authOptions);
@@ -8,30 +8,11 @@ export default async function User(): Promise<JSX.Element> {
      // Check that there's valid session before further actions
      if (!session) return <div>Forbidden</div>;
 
-     const usersVehicles: DataResponse<Vehicle[]> = await GetOwnedVehiclesForUser(session?.user._id!);
-     console.log("UsersVehicles: ", usersVehicles);
-
-     let ownedVehicles;
-     if (usersVehicles.data?.length) {
-          ownedVehicles = usersVehicles.data.map((v) => {
-               return (
-                    <li key={v._id.toString()}>
-                         {v.make}, {v.model}, {v.year}
-                    </li>
-               );
-          });
-     }
-
-     let vehiclesInUse;
-     if (usersVehicles.data?.length) {
-          vehiclesInUse = usersVehicles.data.map((v) => {
-               return (
-                    <li key={v._id.toString()}>
-                         {v.make}, {v.model}, {v.year}
-                    </li>
-               );
-          });
-     }
+     const ownedVehiclesPromise: Promise<DataResponse<Vehicle[]>> = getOwnedVehiclesForUser(session.user._id!);
+     const privilegedVehiclesPromise: Promise<DataResponse<Vehicle[]>> = getPrivilegedVehiclesForUser(session.user._id!);
+     const resolvedPromises: DataResponse<Vehicle[]>[] = await Promise.all([ownedVehiclesPromise, privilegedVehiclesPromise]);
+     const ownedVehicles: DataResponse<Vehicle[]> = resolvedPromises[0];
+     const privilegedVehicles: DataResponse<Vehicle[]> = resolvedPromises[1];
 
      return (
           <>
@@ -43,13 +24,45 @@ export default async function User(): Promise<JSX.Element> {
                          <li>Nimikirjaimet: {session.user.initials}</li>
                          <li>Sähköposti: {session.user.email}</li>
                     </ul>
-                    <br />
-                    <h2>Käyttäjän omistamat autot</h2>
-                    <ul>{ownedVehicles}</ul>
-                    <br />
-                    <h2>Käyttäjän käytössä olevat autot</h2>
-                    <ul>{vehiclesInUse}</ul>
+                    <OwnedVehiclesList vehicles={ownedVehicles.data} />
+                    <PrivilegedVehiclesList vehicles={privilegedVehicles.data} />
                </div>
+          </>
+     );
+}
+
+function OwnedVehiclesList({ vehicles }: { vehicles: Vehicle[] | null | undefined }): JSX.Element | null {
+     if (!vehicles || !vehicles.length) return null;
+     const ownedVehiclesList = vehicles.map((v) => {
+          return (
+               <li key={v._id.toString()}>
+                    {v.make}, {v.model}, {v.year}
+               </li>
+          );
+     });
+     return (
+          <>
+               <br />
+               <h2>Käyttäjän omistamat autot</h2>
+               <ul>{ownedVehiclesList}</ul>
+          </>
+     );
+}
+
+function PrivilegedVehiclesList({ vehicles }: { vehicles: Vehicle[] | null | undefined }): JSX.Element | null {
+     if (!vehicles || !vehicles.length) return null;
+     const privilegedVehiclesList = vehicles.map((v) => {
+          return (
+               <li key={v._id.toString()}>
+                    {v.make}, {v.model}, {v.year}
+               </li>
+          );
+     });
+     return (
+          <>
+               <br />
+               <h2>Käyttäjän muut käytössä olevat autot</h2>
+               <ul>{privilegedVehiclesList}</ul>
           </>
      );
 }

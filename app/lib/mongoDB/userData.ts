@@ -26,7 +26,7 @@ export async function getUser(aadObjectId: string): Promise<DataResponse<AppUser
      }
 }
 
-export async function SaveNewUser(user: AppUser): Promise<DataResponse<AppUser>> {
+export async function saveNewUser(user: AppUser): Promise<DataResponse<AppUser>> {
      // console.log("Starting to save user");
      let saveResponse: DataResponse<AppUser>;
      try {
@@ -43,7 +43,7 @@ export async function SaveNewUser(user: AppUser): Promise<DataResponse<AppUser>>
      }
 }
 
-export async function UpdateUser(user: AppUser): Promise<DataResponse<AppUser>> {
+export async function updateUser(user: AppUser): Promise<DataResponse<AppUser>> {
      // console.log("Starting to update user");
      let saveResponse: DataResponse<AppUser>;
      try {
