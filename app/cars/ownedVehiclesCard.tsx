@@ -32,24 +32,30 @@ export default async function OwnedVehiclesCard(): Promise<JSX.Element | null> {
 
 async function VehicleCard({ vehicle }: { vehicle: Vehicle }): Promise<JSX.Element> {
      return (
-          <div className="relative col-span-1 grid justify-center rounded-md border-2 border-slate-200 bg-slate-300">
-               <h2 className="font-bold">
-                    {vehicle.model} {vehicle.year}, "{vehicle.nickName}"
+          <div className="relative flex flex-col rounded-md border-2 border-slate-200 bg-slate-300">
+               <h2 className="h-10 w-full pt-2 text-center font-bold">
+                    {vehicle.model} {vehicle.year}, &quot;{vehicle.nickName}&quot;
                </h2>
                <GrStatusGoodSmall className={"absolute right-1 top-1" + (vehicle.active ? " text-green-500" : " text-gray-500")} />
-               <Image
-                    src={encodeURI(vehicle.image)}
-                    alt="Kuva"
-                    width={250}
-                    height={150}
-               />
+               <div className="relative flex h-full w-full justify-center">
+                    <div className="absolute bottom-0 mb-4 h-4/5 w-3/4">
+                         <Image
+                              src={encodeURI(vehicle.image)}
+                              alt="Kuva"
+                              fill
+                              style={{ objectFit: "contain" }}
+                              sizes="20vw"
+                              priority
+                         />
+                    </div>
+               </div>
           </div>
      );
 }
 
 function AddVehicleCard() {
      return (
-          <div className="col-span-1 grid h-32 items-center justify-center rounded-md border-2 border-slate-200 bg-slate-300">
+          <div className="col-span-1 grid h-52 w-full items-center justify-center rounded-md border-2 border-slate-200 bg-slate-300">
                <h2 className="font-bold">
                     <FaPlus />
                </h2>
