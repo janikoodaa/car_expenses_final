@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../configuration/authOptions";
-import { getOwnedVehiclesForUser, getPrivilegedVehiclesForUser } from "../lib/mongoDB/vehicleData";
+import { getOwnedVehiclesForUser, getPrivilegedVehiclesForUser } from "../library/mongoDB/vehicleData";
 
 export default async function User(): Promise<JSX.Element> {
      const session = await getServerSession(authOptions);

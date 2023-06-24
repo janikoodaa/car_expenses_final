@@ -1,8 +1,8 @@
 import { Profile, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import { getUser, saveNewUser, updateUser } from "../lib/mongoDB/userData";
-import { getUserFromGraph } from "../lib/msGraph/getUserFromGraph";
+import { getUser, saveNewUser, updateUser } from "../library/mongoDB/userData";
+import { getUserFromGraph } from "../library/msGraph/getUserFromGraph";
 
 export const authOptions = {
      providers: [

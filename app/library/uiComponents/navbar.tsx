@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../configuration/authOptions";
+import { authOptions } from "../../configuration/authOptions";
 import SignOutButton from "./signOutButton";
 import SignInButton from "./signInButton";
 

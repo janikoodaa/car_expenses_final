@@ -1,7 +1,7 @@
 "use client"; // Error components must be Client Components
 
 import { useEffect } from "react";
-import SignOutButton from "./components/signOutButton";
+import SignOutButton from "./library/uiComponents/signOutButton";
 
 export default function Error({ error, reset }: { error: Error; reset: () => void }) {
      useEffect(() => {
