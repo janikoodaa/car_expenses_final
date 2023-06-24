@@ -28,9 +28,9 @@ export const authOptions = {
                // if (token) console.log("token exists in async jwt(), ", token);
 
                if (profile && account) {
-                    const graphData: DataResponse<UserFromGraph> = await getUserFromGraph(account.access_token!);
+                    const graphData: DataResponse<Partial<AppUser>> = await getUserFromGraph(account.access_token!);
                     if (graphData.status === "ok") {
-                         const userFromGraph: UserFromGraph = graphData.data!;
+                         const userFromGraph: Partial<AppUser> = graphData.data!;
                          token.firstName = userFromGraph.givenName!;
                          token.lastName = userFromGraph.surname!;
                          token.initials = userFromGraph.givenName!.substring(0, 1) + userFromGraph.surname!.substring(0, 1);
@@ -42,7 +42,7 @@ export const authOptions = {
                          token.error = "Error getting user data from Graph.";
                     }
 
-                    const foundUser: DataResponse<AppUser> = await getUser(profile.oid!);
+                    const foundUser: DataResponse<Partial<AppUser>> = await getUser(profile.oid!);
                     console.log("Found User: ", foundUser);
 
                     let userIdInApp = foundUser.data?._id;
@@ -53,7 +53,7 @@ export const authOptions = {
                     }
 
                     if (foundUser.status === "ok" && !foundUser.data) {
-                         const saveResult: DataResponse<AppUser> = await saveNewUser({
+                         const saveResult: DataResponse<Partial<AppUser>> = await saveNewUser({
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
                          });
@@ -66,7 +66,7 @@ export const authOptions = {
                          }
                     } else if (foundUser.status === "ok" && foundUser.data?.aadUsername !== profile.preferred_username) {
                          // console.log("Need to update the user's email.");
-                         const updateResult: DataResponse<AppUser> = await updateUser({
+                         const updateResult: DataResponse<Partial<AppUser>> = await updateUser({
                               _id: foundUser.data?._id,
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,

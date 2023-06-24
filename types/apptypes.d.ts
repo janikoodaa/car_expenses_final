@@ -1,14 +1,11 @@
-interface UserFromGraph {
-     givenName: string | null;
-     surname: string | null;
-     initials: string | null;
-     theme: "light" | "dark";
-}
-
 interface AppUser {
      _id?: any;
      aadObjectId: string;
      aadUsername: string;
+     givenName: string | null;
+     surname: string | null;
+     initials: string | null;
+     theme: "light" | "dark";
 }
 
 interface Vehicle {

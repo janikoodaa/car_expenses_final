@@ -4,8 +4,8 @@ import { authOptions } from "../../configuration/authOptions";
 import SignOutButton from "./signOutButton";
 import SignInButton from "./signInButton";
 
-const navLinks = [
-     { path: "/cars", description: "Autot" },
+const protectedLinks = [
+     { path: "/vehicles", description: "Ajoneuvot" },
      { path: "/history", description: "Historia" },
 ];
 
@@ -15,7 +15,7 @@ export default async function Navbar(): Promise<JSX.Element> {
 
      let linksForSignedInUsers: JSX.Element[] | null = null;
      if (session) {
-          linksForSignedInUsers = navLinks.map((l, idx) => {
+          linksForSignedInUsers = protectedLinks.map((l, idx) => {
                return (
                     <li
                          key={idx}

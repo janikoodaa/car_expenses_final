@@ -3,8 +3,8 @@ import clientPromise from "./mongodb";
 const DATABASE = process.env.MONGODB_DATABASE;
 const usersCollection = "users";
 
-export async function getUser(aadObjectId: string): Promise<DataResponse<AppUser>> {
-     let queryResult: DataResponse<AppUser>;
+export async function getUser(aadObjectId: string): Promise<DataResponse<Partial<AppUser>>> {
+     let queryResult: DataResponse<Partial<AppUser>>;
      try {
           const client = await clientPromise;
           const db = client.db(DATABASE);
@@ -26,9 +26,9 @@ export async function getUser(aadObjectId: string): Promise<DataResponse<AppUser
      }
 }
 
-export async function saveNewUser(user: AppUser): Promise<DataResponse<AppUser>> {
+export async function saveNewUser(user: Partial<AppUser>): Promise<DataResponse<Partial<AppUser>>> {
      // console.log("Starting to save user");
-     let saveResponse: DataResponse<AppUser>;
+     let saveResponse: DataResponse<Partial<AppUser>>;
      try {
           const client = await clientPromise;
           const db = client.db(DATABASE);
@@ -43,9 +43,9 @@ export async function saveNewUser(user: AppUser): Promise<DataResponse<AppUser>>
      }
 }
 
-export async function updateUser(user: AppUser): Promise<DataResponse<AppUser>> {
+export async function updateUser(user: Partial<AppUser>): Promise<DataResponse<Partial<AppUser>>> {
      // console.log("Starting to update user");
-     let saveResponse: DataResponse<AppUser>;
+     let saveResponse: DataResponse<Partial<AppUser>>;
      try {
           const client = await clientPromise;
           const db = client.db(DATABASE);
