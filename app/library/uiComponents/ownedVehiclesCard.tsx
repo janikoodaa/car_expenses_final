@@ -5,20 +5,19 @@ import { FaPlus } from "react-icons/fa";
 import { GrStatusGoodSmall } from "react-icons/gr";
 import { OpenVehicleModalButton } from "./vehicleModal";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function OwnedVehiclesSection(): Promise<JSX.Element | null> {
      // Check that there's valid session before further actions
      const session = await getServerSession(authOptions);
      if (!session) return null;
 
-     const ownedVehicles: DataResponse<Vehicle[]> = await getOwnedVehiclesForUser(session.user._id!);
-
-     if (!ownedVehicles.data) return null;
+     const ownedVehicles: IDataResponse<IVehicle[]> = await getOwnedVehiclesForUser(session.user._id!);
 
      return (
           <div className="grid grid-cols-3 gap-x-4">
                <h2 className="col-span-3 mb-4 grid font-bold">Omistamasi ajoneuvot</h2>
-               {ownedVehicles.data.map((v: Vehicle) => {
+               {ownedVehicles.data?.map((v: IVehicle) => {
                     return (
                          <VehicleCardFront
                               key={v._id}
@@ -31,7 +30,7 @@ export default async function OwnedVehiclesSection(): Promise<JSX.Element | null
      );
 }
 
-async function VehicleCardFront({ vehicle }: { vehicle: Vehicle }): Promise<JSX.Element> {
+async function VehicleCardFront({ vehicle }: { vehicle: IVehicle }): Promise<JSX.Element> {
      return (
           <div className="relative flex flex-col rounded-md border-2 border-slate-200 bg-slate-300">
                <h2 className="h-10 w-full pt-2 text-center font-bold">
@@ -41,14 +40,19 @@ async function VehicleCardFront({ vehicle }: { vehicle: Vehicle }): Promise<JSX.
                <GrStatusGoodSmall className={"absolute right-1 top-1" + (vehicle.active ? " text-green-500" : " text-gray-500")} />
                <div className="relative flex h-full w-full justify-center">
                     <div className="absolute bottom-0 mb-4 h-4/5 w-3/4">
-                         <Image
-                              src={encodeURI(vehicle.image)}
-                              alt="Kuva"
-                              fill
-                              style={{ objectFit: "contain" }}
-                              sizes="20vw"
-                              priority
-                         />
+                         <Link
+                              className="absolute h-full w-full"
+                              href={`/vehicles/${vehicle._id}`}
+                         >
+                              <Image
+                                   src={encodeURI(vehicle.image)}
+                                   alt={`${vehicle.make} ${vehicle.model}`}
+                                   fill
+                                   style={{ objectFit: "contain" }}
+                                   sizes="20vw"
+                                   priority
+                              />
+                         </Link>
                     </div>
                </div>
                <OpenVehicleModalButton />

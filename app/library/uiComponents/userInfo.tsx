@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../configuration/authOptions";
+import { authOptions } from "../../configuration/authOptions";
 
 export default async function UserInfo(): Promise<JSX.Element | null> {
      let serverSession = await getServerSession(authOptions);

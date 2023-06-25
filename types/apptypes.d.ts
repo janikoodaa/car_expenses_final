@@ -1,4 +1,4 @@
-interface AppUser {
+interface IAppUser {
      _id?: any;
      aadObjectId: string;
      aadUsername: string;
@@ -8,7 +8,7 @@ interface AppUser {
      theme: "light" | "dark";
 }
 
-interface Vehicle {
+interface IVehicle {
      _id: any;
      type: "car" | "bicycle" | "motorcycle" | "van";
      make: string;
@@ -26,7 +26,7 @@ interface Vehicle {
      image: string | "";
 }
 
-interface DataResponse<T> {
+interface IDataResponse<T> {
      status: "ok" | "error";
      data: T | undefined | null;
      error?: any;

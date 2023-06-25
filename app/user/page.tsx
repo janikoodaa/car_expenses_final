@@ -8,11 +8,11 @@ export default async function User(): Promise<JSX.Element> {
      // Check that there's valid session before further actions
      if (!session) return <div>Forbidden</div>;
 
-     const ownedVehiclesPromise: Promise<DataResponse<Vehicle[]>> = getOwnedVehiclesForUser(session.user._id!);
-     const privilegedVehiclesPromise: Promise<DataResponse<Vehicle[]>> = getPrivilegedVehiclesForUser(session.user._id!);
-     const resolvedPromises: DataResponse<Vehicle[]>[] = await Promise.all([ownedVehiclesPromise, privilegedVehiclesPromise]);
-     const ownedVehicles: DataResponse<Vehicle[]> = resolvedPromises[0];
-     const privilegedVehicles: DataResponse<Vehicle[]> = resolvedPromises[1];
+     const ownedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getOwnedVehiclesForUser(session.user._id!);
+     const privilegedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getPrivilegedVehiclesForUser(session.user._id!);
+     const resolvedPromises: IDataResponse<IVehicle[]>[] = await Promise.all([ownedVehiclesPromise, privilegedVehiclesPromise]);
+     const ownedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[0];
+     const privilegedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[1];
 
      return (
           <>
@@ -31,7 +31,7 @@ export default async function User(): Promise<JSX.Element> {
      );
 }
 
-function OwnedVehiclesList({ vehicles }: { vehicles: Vehicle[] | null | undefined }): JSX.Element | null {
+function OwnedVehiclesList({ vehicles }: { vehicles: IVehicle[] | null | undefined }): JSX.Element | null {
      if (!vehicles || !vehicles.length) return null;
      const ownedVehiclesList = vehicles.map((v) => {
           return (
@@ -49,7 +49,7 @@ function OwnedVehiclesList({ vehicles }: { vehicles: Vehicle[] | null | undefine
      );
 }
 
-function PrivilegedVehiclesList({ vehicles }: { vehicles: Vehicle[] | null | undefined }): JSX.Element | null {
+function PrivilegedVehiclesList({ vehicles }: { vehicles: IVehicle[] | null | undefined }): JSX.Element | null {
      if (!vehicles || !vehicles.length) return null;
      const privilegedVehiclesList = vehicles.map((v) => {
           return (

@@ -5,8 +5,8 @@ import fs from "fs";
 const DATABASE = process.env.MONGODB_DATABASE;
 const vehiclesCollection = "vehicles";
 
-export async function getOwnedVehiclesForUser(userId: string): Promise<DataResponse<Vehicle[]>> {
-     let queryResult: DataResponse<Vehicle[]>;
+export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
+     let queryResult: IDataResponse<IVehicle[]>;
      try {
           const client = await clientPromise;
           const db = client.db(DATABASE);
@@ -15,7 +15,7 @@ export async function getOwnedVehiclesForUser(userId: string): Promise<DataRespo
                .find({ owner: new ObjectId(userId), active: true })
                .sort({ inUseFrom: -1 })
                .toArray();
-          queryResult = { status: "ok", data: vehicles as Vehicle[] };
+          queryResult = { status: "ok", data: vehicles as IVehicle[] };
           return queryResult;
      } catch (error) {
           queryResult = { status: "error", data: null, error: error };
@@ -23,8 +23,8 @@ export async function getOwnedVehiclesForUser(userId: string): Promise<DataRespo
      }
 }
 
-export async function getPrivilegedVehiclesForUser(userId: string): Promise<DataResponse<Vehicle[]>> {
-     let queryResult: DataResponse<Vehicle[]>;
+export async function getPrivilegedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
+     let queryResult: IDataResponse<IVehicle[]>;
      try {
           const client = await clientPromise;
           const db = client.db(DATABASE);
@@ -33,7 +33,23 @@ export async function getPrivilegedVehiclesForUser(userId: string): Promise<Data
                .find({ coUsers: new ObjectId(userId), active: true })
                .sort({ inUseFrom: -1 })
                .toArray();
-          queryResult = { status: "ok", data: vehicles as Vehicle[] };
+          queryResult = { status: "ok", data: vehicles as IVehicle[] };
+          return queryResult;
+     } catch (error) {
+          queryResult = { status: "error", data: null, error: error };
+          return queryResult;
+     }
+}
+
+export async function getVehicleById(vehicleId: string, userId: string): Promise<IDataResponse<IVehicle>> {
+     let queryResult: IDataResponse<IVehicle>;
+     try {
+          const client = await clientPromise;
+          const db = client.db(DATABASE);
+          const vehicle: any = await db
+               .collection(vehiclesCollection)
+               .findOne({ $or: [{ coUsers: new ObjectId(userId) }, { owner: new ObjectId(userId) }], _id: new ObjectId(vehicleId) });
+          queryResult = { status: "ok", data: vehicle as IVehicle };
           return queryResult;
      } catch (error) {
           queryResult = { status: "error", data: null, error: error };
