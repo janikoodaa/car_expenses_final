@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../configuration/authOptions";
 import { getOwnedVehiclesForUser } from "../mongoDB/vehicleData";
-import { FaPlus } from "react-icons/fa";
 import { GrStatusGoodSmall } from "react-icons/gr";
 import { OpenVehicleModalButton } from "./vehicleModal";
+import AddVehicleCard from "./addNewVehicle";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -56,16 +56,6 @@ async function VehicleCardFront({ vehicle }: { vehicle: IVehicle }): Promise<JSX
                     </div>
                </div>
                <OpenVehicleModalButton />
-          </div>
-     );
-}
-
-function AddVehicleCard() {
-     return (
-          <div className="col-span-1 grid h-52 w-full items-center justify-center rounded-md border-2 border-slate-200 bg-slate-300">
-               <h2 className="font-bold">
-                    <FaPlus />
-               </h2>
           </div>
      );
 }

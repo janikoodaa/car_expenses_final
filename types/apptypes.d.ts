@@ -13,16 +13,16 @@ interface IVehicle {
      type: "car" | "bicycle" | "motorcycle" | "van";
      make: string;
      model: string;
-     nickName: string | null;
+     nickName: string;
      year: number;
      registeringDate: Date;
      registerNumber: string;
      inUseFrom: Date;
      InUseTo: Date;
-     primaryFuel: "95E10" | "98E5" | "Diesel" | null;
+     primaryFuel: "95E10" | "98E5" | "Diesel";
      active: boolean;
-     owner: string;
-     coUsers: string[] | null;
+     owner: Partial<IAppUser>[];
+     coUsers: Partial<IAppUser>[] | null;
      image: string | "";
 }
 

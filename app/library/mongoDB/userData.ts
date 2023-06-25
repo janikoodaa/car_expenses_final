@@ -50,7 +50,9 @@ export async function updateUser(user: Partial<IAppUser>): Promise<IDataResponse
           const client = await clientPromise;
           const db = client.db(DATABASE);
 
-          const updatedUser = await db.collection(usersCollection).updateOne({ _id: user._id }, { $set: { aadUsername: user.aadUsername } });
+          const updatedUser = await db
+               .collection(usersCollection)
+               .updateOne({ _id: user._id }, { $set: { aadUsername: user.aadUsername, givenName: user.givenName, surname: user.surname } });
           //   console.log(`User ${updatedUser} updated.`);
 
           return (saveResponse = { status: "ok", data: user });

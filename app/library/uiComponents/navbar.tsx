@@ -11,7 +11,7 @@ const protectedLinks = [
 
 export default async function Navbar(): Promise<JSX.Element> {
      let session = await getServerSession(authOptions);
-     console.log("serverSession in UserInfo: ", session);
+     // console.log("serverSession in Navbar: ", session);
 
      let linksForSignedInUsers: JSX.Element[] | null = null;
      if (session) {

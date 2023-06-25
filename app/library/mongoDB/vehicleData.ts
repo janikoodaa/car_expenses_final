@@ -1,9 +1,9 @@
 import { ObjectId } from "mongodb";
 import clientPromise from "./mongodb";
-import fs from "fs";
 
 const DATABASE = process.env.MONGODB_DATABASE;
 const vehiclesCollection = "vehicles";
+const vehiclesView = "vehiclesView";
 
 export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
      let queryResult: IDataResponse<IVehicle[]>;
@@ -23,12 +23,12 @@ export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResp
      }
 }
 
-export async function getPrivilegedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
+export async function getGrantedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
      let queryResult: IDataResponse<IVehicle[]>;
      try {
           const client = await clientPromise;
           const db = client.db(DATABASE);
-          const vehicles = await db
+          const vehicles: any = await db
                .collection(vehiclesCollection)
                .find({ coUsers: new ObjectId(userId), active: true })
                .sort({ inUseFrom: -1 })
@@ -46,9 +46,10 @@ export async function getVehicleById(vehicleId: string, userId: string): Promise
      try {
           const client = await clientPromise;
           const db = client.db(DATABASE);
-          const vehicle: any = await db
-               .collection(vehiclesCollection)
-               .findOne({ $or: [{ coUsers: new ObjectId(userId) }, { owner: new ObjectId(userId) }], _id: new ObjectId(vehicleId) });
+          const vehicle: any = await db.collection(vehiclesView).findOne({
+               $or: [{ "owner._id": new ObjectId(userId) }, { "coUsers._id": new ObjectId(userId) }],
+               _id: new ObjectId(vehicleId),
+          });
           queryResult = { status: "ok", data: vehicle as IVehicle };
           return queryResult;
      } catch (error) {

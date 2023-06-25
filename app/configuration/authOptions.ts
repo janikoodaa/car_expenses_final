@@ -56,6 +56,8 @@ export const authOptions = {
                          const saveResult: IDataResponse<Partial<IAppUser>> = await saveNewUser({
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
+                              givenName: token.firstName,
+                              surname: token.lastName,
                          });
 
                          userIdInApp = saveResult.data?._id;
@@ -64,12 +66,19 @@ export const authOptions = {
                               console.error("Saving new user failed. ", saveResult.error);
                               token.error += " Saving new user failed.";
                          }
-                    } else if (foundUser.status === "ok" && foundUser.data?.aadUsername !== profile.preferred_username) {
+                    } else if (
+                         foundUser.status === "ok" &&
+                         (foundUser.data?.aadUsername !== profile.preferred_username ||
+                              foundUser.data?.givenName !== token.firstName ||
+                              foundUser.data?.surname !== token.lastName)
+                    ) {
                          // console.log("Need to update the user's email.");
                          const updateResult: IDataResponse<Partial<IAppUser>> = await updateUser({
                               _id: foundUser.data?._id,
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
+                              givenName: token.firstName,
+                              surname: token.lastName,
                          });
                          if (updateResult.status === "error") {
                               // console.error("Updating user data failed. ", updateResult.error);
