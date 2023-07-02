@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../configuration/authOptions";
-import { getOwnedVehiclesForUser, getPrivilegedVehiclesForUser } from "../library/mongoDB/vehicleData";
+import { getOwnedVehiclesForUser, getGrantedVehiclesForUser } from "../library/mongoDB/vehicleData";
 
 export default async function User(): Promise<JSX.Element> {
      const session = await getServerSession(authOptions);
@@ -9,7 +9,7 @@ export default async function User(): Promise<JSX.Element> {
      if (!session) return <div>Forbidden</div>;
 
      const ownedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getOwnedVehiclesForUser(session.user._id!);
-     const privilegedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getPrivilegedVehiclesForUser(session.user._id!);
+     const privilegedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getGrantedVehiclesForUser(session.user._id!);
      const resolvedPromises: IDataResponse<IVehicle[]>[] = await Promise.all([ownedVehiclesPromise, privilegedVehiclesPromise]);
      const ownedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[0];
      const privilegedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[1];

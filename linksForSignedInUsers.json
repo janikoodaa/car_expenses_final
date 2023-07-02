@@ -1,0 +1,4 @@
+[
+     { "path": "/vehicles", "description": "Ajoneuvot" },
+     { "path": "/history", "description": "Historia" }
+]

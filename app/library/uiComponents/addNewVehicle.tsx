@@ -4,16 +4,17 @@ import { FaPlus } from "react-icons/fa";
 import Input from "./inputComponent";
 import Select from "./selectComponent";
 import DatePicker from "./datePickerComponent";
+import Button from "./buttonComponent";
 
 const newVehicle: Partial<IVehicle> = {
      make: "",
      model: "",
-     type: "car",
+     type: undefined,
      nickName: "",
-     inUseFrom: new Date(),
+     inUseFrom: new Date(new Date().setHours(0, 0, 0, 0)),
      primaryFuel: undefined,
-     registeringDate: new Date(),
-     year: new Date().getFullYear(),
+     registeringDate: new Date(new Date().setHours(0, 0, 0, 0)),
+     year: 0,
      registerNumber: "",
      active: true,
      image: "",
@@ -66,7 +67,7 @@ export default function AddVehicleCard() {
                </div>
                {modalOpen ? (
                     <div className="fixed inset-0 h-full w-full overflow-y-auto backdrop-blur">
-                         <div className="relative top-10 z-10 mx-auto max-h-[80%] w-1/2 overflow-y-auto rounded-md border-2 border-solid border-slate-600 bg-slate-300 shadow-md">
+                         <div className="relative top-10 z-10 mx-auto max-h-[80%] overflow-y-auto rounded-md border-2 border-solid border-slate-600 bg-slate-300 shadow-md md:w-3/4 lg:w-1/2">
                               <div className="fixed w-full bg-slate-300 px-4 py-2 font-bold">
                                    <h1>Lisää uusi ajoneuvo</h1>
                               </div>
@@ -85,44 +86,50 @@ export default function AddVehicleCard() {
                                         />
                                         <Input
                                              name="make"
+                                             placeholder={"Merkki"}
+                                             required
                                              label="Merkki"
                                              type="text"
-                                             required
-                                             placeholder={"Merkki"}
+                                             maxLength={20}
                                              value={formData.make}
                                              onChange={handleFormChange}
                                         />
                                         <Input
                                              name="model"
+                                             placeholder={"Malli"}
+                                             required
                                              label="Malli"
                                              type="text"
-                                             required
-                                             placeholder={"Malli"}
+                                             maxLength={50}
                                              value={formData.model}
                                              onChange={(e: ChangeEvent<HTMLInputElement>) => handleFormChange(e)}
                                         />
                                         <Input
                                              name="year"
+                                             placeholder={"Vuosimalli"}
+                                             required
                                              label="Vuosimalli"
                                              type="number"
-                                             required
-                                             placeholder={"Vuosimalli"}
+                                             min={1900}
+                                             max={new Date().getFullYear() + 1}
                                              value={formData.year}
                                              onChange={(e: ChangeEvent<HTMLInputElement>) => handleFormChange(e)}
                                         />
                                         <Input
                                              name="nickName"
+                                             placeholder={"Lempinimi"}
                                              label="Lempinimi"
                                              type="text"
-                                             placeholder={"Kottero"}
+                                             maxLength={20}
                                              value={formData.nickName}
                                              onChange={(e: ChangeEvent<HTMLInputElement>) => handleFormChange(e)}
                                         />
                                         <Input
                                              name="registerNumber"
+                                             placeholder={"ABC-123"}
                                              label="Rekisteritunnus"
                                              type="text"
-                                             placeholder={"ABC-123"}
+                                             maxLength={7}
                                              value={formData.registerNumber}
                                              onChange={(e: ChangeEvent<HTMLInputElement>) => handleFormChange(e)}
                                         />
@@ -145,21 +152,29 @@ export default function AddVehicleCard() {
                                              dateValue={formData.inUseFrom || new Date("1900-01-01")}
                                              onChange={handleFormChange}
                                         />
+                                        <Input
+                                             name="vehicleImage"
+                                             placeholder={"Liitä kuva"}
+                                             label="Ajoneuvon kuva"
+                                             type="file"
+                                             // value={formData.registerNumber}
+                                             // onChange={(e: ChangeEvent<HTMLInputElement>) => handleFormChange(e)}
+                                        />
                                         <hr />
                                         <div className="flex w-full columns-2 flex-row justify-evenly gap-4">
-                                             <button
+                                             <Button
                                                   type="button"
-                                                  className="flex w-32 bg-gray-500 text-center text-white"
+                                                  buttonText="Peruuta"
+                                                  variant="secondary"
+                                                  // className="border-2 border-solid border-gray-500 bg-transparent text-gray-500"
                                                   onClick={resetAndCloseModal}
-                                             >
-                                                  Peruuta
-                                             </button>
-                                             <button
+                                             />
+                                             <Button
                                                   type="submit"
-                                                  className="flex w-32 bg-green-700 text-center text-white"
-                                             >
-                                                  Tallenna
-                                             </button>
+                                                  buttonText="Tallenna"
+                                                  variant="primary"
+                                                  onClick={handleSubmit}
+                                             />
                                         </div>
                                    </form>
                               </div>

@@ -7,8 +7,6 @@ interface IInputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export default function Input({ label, ...defaultProps }: IInputProps) {
-     //  console.log("...defautProps: ", defaultProps);
-
      return (
           <div className="flex flex-col">
                <label
@@ -18,12 +16,11 @@ export default function Input({ label, ...defaultProps }: IInputProps) {
                     {label}
                </label>
                <input
+                    {...defaultProps}
                     id={defaultProps.name}
-                    name={defaultProps.name}
-                    type={defaultProps.type}
-                    className="rounded-md pl-2 text-lg"
-                    value={defaultProps.value}
-                    onChange={defaultProps.onChange}
+                    disabled={defaultProps.type === "file"}
+                    className={`rounded-md px-2 py-1 text-lg file:h-8 file:rounded-md file:bg-neutral-500 file:text-center file:text-base file:text-white file:shadow-md file:shadow-gray-600 file:focus:shadow-sm ${defaultProps.className}`}
+                    value={defaultProps.type === "number" && defaultProps.value === 0 ? "" : defaultProps.value}
                />
           </div>
      );

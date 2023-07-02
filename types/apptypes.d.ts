@@ -31,3 +31,8 @@ interface IDataResponse<T> {
      data: T | undefined | null;
      error?: any;
 }
+
+interface ILink {
+     path: string;
+     description: string;
+}
