@@ -58,21 +58,19 @@ export async function getVehicleById(vehicleId: string, userId: string): Promise
      }
 }
 
-// export async function updateVehicleImage(vehicleId: string, imageSrc: string): Promise<DataResponse<null>> {
-//      console.log("updateVehicleImage called");
-//      let result: DataResponse<null>;
-//      try {
-//           const client = await clientPromise;
-//           const db = client.db(DATABASE);
-//           const response = await db
-//                .collection(vehiclesCollection)
-//                .updateOne({ _id: new ObjectId(vehicleId) }, { $set: { image: fs.readFileSync(imageSrc) } });
-//           result = { status: "ok", data: null };
-//           console.log("Response when saving image: ", response);
-//           return result;
-//      } catch (error) {
-//           console.error("Error saving image: ", error);
-//           result = { status: "error", data: null, error: error };
-//           return result;
-//      }
-// }
+export async function insertNewVehicle(vehicle: Partial<IVehicle>): Promise<IDataResponse<IVehicle>> {
+     let insertResult: IDataResponse<IVehicle>;
+     try {
+          const client = await clientPromise;
+          const db = client.db(DATABASE);
+          console.log("vehicle param in insertNewVehicle: ", vehicle);
+          const newVehicle: any = await db.collection(vehiclesCollection).insertOne(vehicle);
+          // console.log("new inserted vehicle: ", newVehicle);
+          insertResult = { status: "ok", data: newVehicle as IVehicle };
+          // insertResult = { status: "ok", data: vehicle };
+          return insertResult;
+     } catch (error) {
+          insertResult = { status: "error", data: null, error: error };
+          return insertResult;
+     }
+}

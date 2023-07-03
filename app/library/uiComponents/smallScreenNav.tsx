@@ -21,15 +21,16 @@ export default function SmallScreenNav(): JSX.Element {
                               >
                                    Auton kululoki
                               </Link>
-                              {status === "authenticated" ? (
+                              {status === "unauthenticated" ? (
+                                   <SignInButton />
+                              ) : (
                                    <button
                                         className="ml-auto flex rounded-md border-2 border-solid border-slate-100 p-1"
                                         onClick={() => setShowBurgerMenu((prev) => !prev)}
+                                        disabled={status === "loading"}
                                    >
                                         {!showBurgerMenu ? <GiHamburgerMenu className="text-md" /> : <IoMdClose className="text-md" />}
                                    </button>
-                              ) : status === "loading" ? null : (
-                                   <SignInButton />
                               )}
                          </div>
                     </li>

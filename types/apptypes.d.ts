@@ -10,7 +10,7 @@ interface IAppUser {
 
 interface IVehicle {
      _id: any;
-     type: "car" | "bicycle" | "motorcycle" | "van";
+     type: "car" | "bicycle" | "motorcycle" | "van" | undefined;
      make: string;
      model: string;
      nickName: string;
@@ -19,7 +19,7 @@ interface IVehicle {
      registerNumber: string;
      inUseFrom: Date;
      InUseTo: Date;
-     primaryFuel: "95E10" | "98E5" | "Diesel";
+     primaryFuel: "95E10" | "98E5" | "Diesel" | undefined;
      active: boolean;
      owner: Partial<IAppUser>[];
      coUsers: Partial<IAppUser>[] | null;

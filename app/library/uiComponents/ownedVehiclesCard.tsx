@@ -13,6 +13,7 @@ export default async function OwnedVehiclesSection(): Promise<JSX.Element | null
      if (!session) return null;
 
      const ownedVehicles: IDataResponse<IVehicle[]> = await getOwnedVehiclesForUser(session.user._id!);
+     // console.log("ownedVehicles: ", ownedVehicles);
 
      return (
           <div className="grid gap-x-4 gap-y-4 sm:grid-cols-1 md:grid-cols-3">
@@ -44,14 +45,16 @@ async function VehicleCardFront({ vehicle }: { vehicle: IVehicle }): Promise<JSX
                               className="absolute h-full w-full"
                               href={`/vehicles/${vehicle._id}`}
                          >
-                              <Image
-                                   src={encodeURI(vehicle.image)}
-                                   alt={`${vehicle.make} ${vehicle.model}`}
-                                   fill
-                                   style={{ objectFit: "contain" }}
-                                   sizes="20vw"
-                                   priority
-                              />
+                              {vehicle.image ? (
+                                   <Image
+                                        src={encodeURI(vehicle.image)}
+                                        alt={`${vehicle.make} ${vehicle.model}`}
+                                        fill
+                                        style={{ objectFit: "contain" }}
+                                        sizes="20vw"
+                                        priority
+                                   />
+                              ) : null}
                          </Link>
                     </div>
                </div>

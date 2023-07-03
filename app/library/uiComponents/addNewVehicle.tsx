@@ -5,6 +5,7 @@ import Input from "./inputComponent";
 import Select from "./selectComponent";
 import DatePicker from "./datePickerComponent";
 import Button from "./buttonComponent";
+import { insertNewVehicle } from "../mongoDB/vehicleData";
 
 const newVehicle: Partial<IVehicle> = {
      make: "",
@@ -44,6 +45,8 @@ export default function AddVehicleCard() {
           //   console.log(`handleFormChange e.target.name: ${e.target.name} and e.target.value: ${e.target.value}`);
           if (e.target.name === "registeringDate" || e.target.name === "inUseFrom") {
                setFormData((prev) => ({ ...prev, [e.target.name]: new Date(e.target.value) }));
+          } else if (e.target.name === "registerNumber") {
+               setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value.toUpperCase() }));
           } else {
                setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
           }
@@ -52,9 +55,16 @@ export default function AddVehicleCard() {
           setFormData(newVehicle);
           toggleModal();
      };
-     const handleSubmit = (e: any) => {
+     const handleSubmit = async (e: any) => {
           e.preventDefault();
-          console.log("New vehicle form data: ", formData);
+          if (formData.type !== undefined && formData.primaryFuel !== undefined) {
+               console.log("New vehicle form data: ", formData);
+               const res = await fetch("/api/vehicle", {
+                    method: "POST",
+                    body: JSON.stringify(formData),
+                    headers: { "Content-Type": "application/json" },
+               });
+          }
      };
      return (
           <>
