@@ -1,9 +1,10 @@
 import { Profile, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import { IAppUser, IAppUserWithId, getUser, saveNewUser, updateUser } from "../library/mongoDB/userData";
+import { getUser, saveNewUser, updateUser } from "../library/mongoDB/userData";
 import { getUserFromGraph } from "../library/msGraph/getUserFromGraph";
 import IDataResponse from "@/types/dataResponse";
+import { IAppUser } from "../library/models/User";
 
 export const authOptions = {
      providers: [
@@ -45,7 +46,7 @@ export const authOptions = {
                     }
 
                     /** Next check, if the user already exists in app */
-                    const foundUser: IDataResponse<IAppUserWithId> = await getUser(profile.oid!);
+                    const foundUser: IDataResponse<IAppUser> = await getUser(profile.oid!);
                     console.log("Found User: ", foundUser);
 
                     if (foundUser.status === "error") {
@@ -54,12 +55,12 @@ export const authOptions = {
                     }
 
                     if (foundUser.status === "ok" && foundUser.data) {
-                         token._id = foundUser.data._id.toString();
+                         token._id = foundUser.data._id!.toString();
                     }
 
                     /** If user is new to app, insert user data to database */
-                    if (foundUser.status === "ok" && !foundUser.data) {
-                         const saveResult: IDataResponse<IAppUserWithId> = await saveNewUser({
+                    if (graphData.status === "ok" && foundUser.status === "ok" && !foundUser.data) {
+                         const saveResult: IDataResponse<IAppUser> = await saveNewUser({
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
                               givenName: token.firstName,
@@ -70,17 +71,18 @@ export const authOptions = {
                               console.error("Saving new user failed. ", saveResult.error);
                               token.error += " Saving new user failed.";
                          } else {
-                              token._id = saveResult.data!._id.toString();
+                              token._id = saveResult.data!._id!.toString();
                          }
                     } else if (
                          /** If user is already existing, check if some of the user data has changed compared to Azure AD and update, if necessary */
+                         graphData.status === "ok" &&
                          foundUser.status === "ok" &&
                          foundUser.data &&
                          (foundUser.data.aadUsername !== profile.preferred_username ||
                               foundUser.data.givenName !== token.firstName ||
                               foundUser.data.surname !== token.lastName)
                     ) {
-                         const updateResult: IDataResponse<IAppUserWithId> = await updateUser({
+                         const updateResult: IDataResponse<IAppUser> = await updateUser({
                               _id: foundUser.data._id,
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,

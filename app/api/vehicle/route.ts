@@ -2,8 +2,9 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/configuration/authOptions";
 import { ObjectId } from "mongodb";
-import { IVehicle, IVehicleWithId, insertNewVehicle } from "@/app/library/mongoDB/vehicleData";
+import { insertNewVehicle } from "@/app/library/mongoDB/vehicleData";
 import IDataResponse from "@/types/dataResponse";
+import { IVehicle } from "@/app/library/models/Vehicle";
 
 export async function POST(request: NextRequest): Promise<Response> {
      try {
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest): Promise<Response> {
                inUseFrom: new Date(req.inUseFrom),
                registeringDate: new Date(req.registeringDate),
           };
-          const dbResponse: IDataResponse<IVehicleWithId> = await insertNewVehicle(vehicleToInsert);
+          const dbResponse: IDataResponse<IVehicle> = await insertNewVehicle(vehicleToInsert);
           //   console.log("Insert result: ", dbResponse);
           if (dbResponse.status === "ok") {
                return new Response(JSON.stringify(dbResponse.data), { status: 201 });

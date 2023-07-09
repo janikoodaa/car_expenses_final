@@ -5,7 +5,7 @@ import Input from "./inputComponent";
 import Select from "./selectComponent";
 import DatePicker from "./datePickerComponent";
 import Button from "./buttonComponent";
-import { IVehicle } from "../mongoDB/vehicleData";
+import { IVehicle } from "../models/Vehicle";
 
 const newVehicle: Partial<IVehicle> = {
      make: "",
@@ -18,7 +18,7 @@ const newVehicle: Partial<IVehicle> = {
      year: 0,
      registerNumber: "",
      active: true,
-     image: "",
+     imageUrl: "",
      coUsers: [],
 };
 

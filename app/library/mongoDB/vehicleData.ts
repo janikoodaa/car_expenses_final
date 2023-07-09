@@ -1,44 +1,17 @@
-import { InsertOneResult, ObjectId } from "mongodb";
-import { getDbConnection } from "./mongodb";
-import { IAppUser, IAppUserWithId } from "./userData";
+import Vehicle, { IVehicle } from "../models/Vehicle";
 import IDataResponse from "@/types/dataResponse";
-
-export interface IVehicle {
-     type: "car" | "bicycle" | "motorcycle" | "van" | undefined;
-     make: string;
-     model: string;
-     nickName: string;
-     year: number;
-     registeringDate: Date;
-     registerNumber: string;
-     inUseFrom: Date;
-     InUseTo: Date;
-     primaryFuel: "95E10" | "98E5" | "Diesel" | undefined;
-     active: boolean;
-     owner: IAppUserWithId[] | IAppUser[] | ObjectId;
-     coUsers: IAppUserWithId[] | IAppUser[] | ObjectId[] | null;
-     image: string | "";
-}
-
-export interface IVehicleWithId extends IVehicle {
-     _id?: ObjectId | undefined;
-}
-
-const vehiclesCollection = process.env.MONGODB_VEHICLES_COLLECTION;
-const vehiclesView = process.env.MONGODB_VEHICLES_VIEW;
+import dbConnect from "../database/dbConnect";
+import { HydratedDocument } from "mongoose";
 
 /**
  * Get vehicles the user owns at the moment
  * @param userId
  * @returns data response containing array of vehicles as data
  */
-export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicleWithId[]>> {
+export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
      try {
-          const vehicleCollection = (await getDbConnection()).collection<IVehicleWithId>(vehiclesCollection);
-          const vehicles: IVehicleWithId[] = await vehicleCollection
-               .find<IVehicleWithId>({ owner: new ObjectId(userId), active: true })
-               .sort({ inUseFrom: -1 })
-               .toArray();
+          await dbConnect();
+          const vehicles: HydratedDocument<IVehicle>[] = await Vehicle.find({ owner: userId, active: true }).sort({ inUseFrom: -1 });
           return { status: "ok", data: vehicles };
      } catch (error) {
           return { status: "error", data: null, error: error };
@@ -50,13 +23,12 @@ export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResp
  * @param userId
  * @returns data response containing array of vehicles as data
  */
-export async function getGrantedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicleWithId[]>> {
+export async function getGrantedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
      try {
-          const vehicleCollection = (await getDbConnection()).collection<IVehicleWithId>(vehiclesCollection);
-          const vehicles: IVehicleWithId[] = await vehicleCollection
-               .find<IVehicleWithId>({ coUsers: new ObjectId(userId), active: true })
-               .sort({ inUseFrom: -1 })
-               .toArray();
+          await dbConnect();
+          const vehicles: HydratedDocument<IVehicle>[] = await Vehicle.find({ coUsers: userId, active: true }).sort({
+               inUseFrom: -1,
+          });
           return { status: "ok", data: vehicles };
      } catch (error) {
           return { status: "error", data: null, error: error };
@@ -68,13 +40,13 @@ export async function getGrantedVehiclesForUser(userId: string): Promise<IDataRe
  * @param userId
  * @returns data response containing array of vehicles as data
  */
-export async function getRetiredVehiclesForUser(userId: string): Promise<IDataResponse<IVehicleWithId[]>> {
+export async function getRetiredVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
      try {
-          const vehicleCollection = (await getDbConnection()).collection<IVehicleWithId>(vehiclesCollection);
-          const vehicles: IVehicleWithId[] = await vehicleCollection
-               .find<IVehicleWithId>({ active: false, $or: [{ owner: new ObjectId(userId) }, { coUsers: new ObjectId(userId) }] })
-               .sort({ inUseTo: -1 })
-               .toArray();
+          await dbConnect();
+          const vehicles: HydratedDocument<IVehicle>[] = await Vehicle.find({
+               active: false,
+               $or: [{ owner: userId }, { coUsers: userId }],
+          }).sort({ inUseTo: -1 });
           // console.log("found retired vehicles: ", vehicles);
           return { status: "ok", data: vehicles };
      } catch (error) {
@@ -90,11 +62,11 @@ export async function getRetiredVehiclesForUser(userId: string): Promise<IDataRe
  */
 export async function getVehicleById(vehicleId: string, userId: string): Promise<IDataResponse<IVehicle>> {
      try {
-          const vehicleCollection = (await getDbConnection()).collection<IVehicle>(vehiclesView);
-          const vehicle: IVehicle | null = await vehicleCollection.findOne<IVehicle>({
-               $or: [{ "owner._id": new ObjectId(userId) }, { "coUsers._id": new ObjectId(userId) }],
-               _id: new ObjectId(vehicleId),
-          });
+          await dbConnect();
+          const vehicle = await Vehicle.findOne({
+               $or: [{ owner: userId }, { coUsers: userId }],
+               _id: vehicleId,
+          }).populate(["owner", "coUsers"]);
           return { status: "ok", data: vehicle };
      } catch (error) {
           return { status: "error", data: null, error: error };
@@ -106,13 +78,13 @@ export async function getVehicleById(vehicleId: string, userId: string): Promise
  * @param vehicle
  * @returns data response containing Mongo insert result as data
  */
-export async function insertNewVehicle(vehicle: IVehicle): Promise<IDataResponse<IVehicleWithId>> {
+export async function insertNewVehicle(vehicle: IVehicle): Promise<IDataResponse<IVehicle>> {
      try {
           // console.log("vehicle param in insertNewVehicle: ", vehicle);
-          const vehicleCollection = (await getDbConnection()).collection<IVehicle>(vehiclesView);
-          const insertResult: InsertOneResult<IVehicle> = await vehicleCollection.insertOne(vehicle);
+          await dbConnect();
+          const result = new Vehicle(vehicle).save();
           // console.log("new inserted vehicle: ", insertResult);
-          return { status: "ok", data: { ...vehicle, _id: insertResult.insertedId } };
+          return { status: "ok", data: result };
      } catch (error) {
           return { status: "error", data: null, error: error };
      }

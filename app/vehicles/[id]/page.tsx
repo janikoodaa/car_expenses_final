@@ -1,6 +1,7 @@
 import { authOptions } from "@/app/configuration/authOptions";
-import { IAppUser } from "@/app/library/mongoDB/userData";
-import { IVehicle, getVehicleById } from "@/app/library/mongoDB/vehicleData";
+import { IAppUser } from "@/app/library/models/User";
+import { IVehicle } from "@/app/library/models/Vehicle";
+import { getVehicleById } from "@/app/library/mongoDB/vehicleData";
 import IDataResponse from "@/types/dataResponse";
 import { getServerSession } from "next-auth";
 
@@ -10,11 +11,11 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
      if (!session) return null;
 
      const response: IDataResponse<IVehicle> = await getVehicleById(vehicleId, session.user._id!);
-     // console.log("vehicle page response: ", response.data);
+     console.log("vehicle page response: ", response);
 
      if (response.status === "ok" && response.data) {
-          const vehicle = response.data;
-          const owner = response.data.owner as IAppUser[];
+          const vehicle: IVehicle = response.data;
+          const owner = response.data.owner as IAppUser;
           const coUsers = response.data.coUsers as IAppUser[];
           return (
                <div>
@@ -25,13 +26,13 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                     <p>Käytössä alkaen: {vehicle.inUseFrom.toLocaleDateString("fi")}</p>
                     <p>Polttoaine: {vehicle.primaryFuel}</p>
                     <p>Rekisteritunnus: {vehicle.registerNumber}</p>
-                    <p>Rekisteröintipäivä: {vehicle.registeringDate.toLocaleDateString("fi")}</p>
+                    <p>Rekisteröintipäivä: {vehicle.registeringDate ? vehicle.registeringDate.toLocaleDateString("fi") : "-"}</p>
                     <br />
                     <h1>Ajoneuvon omistaja</h1>
                     <p>
-                         Omistaja: {owner[0].givenName} {owner[0].surname}
+                         Omistaja: {owner.givenName} {owner.surname}
                     </p>
-                    <p>Omistajan sähköposti: {owner[0].aadUsername}</p>
+                    <p>Omistajan sähköposti: {owner.aadUsername}</p>
                     <br />
                     <h1>Ajoneuvon muut käyttäjät</h1>
                     {coUsers.map((cu, idx) => {

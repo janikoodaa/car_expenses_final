@@ -1,6 +1,6 @@
 import IDataResponse from "@/types/dataResponse";
 import { Client } from "@microsoft/microsoft-graph-client";
-import { IAppUser } from "../mongoDB/userData";
+import { IAppUser } from "../models/User";
 
 /**
  * Get user data from MS Graph API with user's access token
