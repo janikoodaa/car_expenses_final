@@ -1,8 +1,9 @@
 import { GrStatusGoodSmall } from "react-icons/gr";
 import Image from "next/image";
 import Link from "next/link";
+import { IVehicleWithId } from "../mongoDB/vehicleData";
 
-export async function VehicleCard({ vehicle }: { vehicle: IVehicle }): Promise<JSX.Element> {
+export async function VehicleCard({ vehicle }: { vehicle: IVehicleWithId }): Promise<JSX.Element> {
      return (
           <div className="relative flex h-52 flex-col rounded-md border-2 border-slate-200 bg-slate-300">
                <h2 className="h-10 w-full pt-2 text-center font-bold">

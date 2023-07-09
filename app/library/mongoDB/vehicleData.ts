@@ -15,8 +15,8 @@ export interface IVehicle {
      InUseTo: Date;
      primaryFuel: "95E10" | "98E5" | "Diesel" | undefined;
      active: boolean;
-     owner: IAppUserWithId[] | IAppUser | ObjectId;
-     coUsers: IAppUserWithId[] | IAppUser | ObjectId | null;
+     owner: IAppUserWithId[] | IAppUser[] | ObjectId;
+     coUsers: IAppUserWithId[] | IAppUser[] | ObjectId[] | null;
      image: string | "";
 }
 
