@@ -1,13 +1,13 @@
+import GrantedVehiclesSection from "../library/uiComponents/grantedVehiclesCard";
 import OwnedVehiclesSection from "../library/uiComponents/ownedVehiclesCard";
-// import VehicleModal from "../library/uiComponents/vehicleModal";
+import RetiredVehiclesSection from "../library/uiComponents/retiredVehiclesCard";
 
 export default function VehiclesPage(): JSX.Element {
      return (
           <>
-               <div className="mx-2 my-2 rounded-lg bg-slate-400 px-2 py-2">
-                    <OwnedVehiclesSection />
-               </div>
-               {/* <VehicleModal /> */}
+               <OwnedVehiclesSection />
+               <GrantedVehiclesSection />
+               <RetiredVehiclesSection />
           </>
      );
 }

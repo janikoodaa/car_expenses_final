@@ -5,7 +5,7 @@ import Input from "./inputComponent";
 import Select from "./selectComponent";
 import DatePicker from "./datePickerComponent";
 import Button from "./buttonComponent";
-import { insertNewVehicle } from "../mongoDB/vehicleData";
+import { IVehicle } from "../mongoDB/vehicleData";
 
 const newVehicle: Partial<IVehicle> = {
      make: "",

@@ -1,63 +1,80 @@
-import clientPromise from "./mongodb";
+import { InsertOneResult, ObjectId, UpdateResult } from "mongodb";
+import { getDbConnection } from "./mongodb";
+import IDataResponse from "@/types/dataResponse";
 
-const DATABASE = process.env.MONGODB_DATABASE;
-const usersCollection = "users";
+export interface IAppUser {
+     aadObjectId: string;
+     aadUsername: string;
+     givenName: string | null;
+     surname: string | null;
+     initials?: string | null;
+     theme?: "light" | "dark";
+}
 
-export async function getUser(aadObjectId: string): Promise<IDataResponse<Partial<IAppUser>>> {
-     let queryResult: IDataResponse<Partial<IAppUser>>;
+export interface IAppUserWithId extends IAppUser {
+     _id: ObjectId;
+}
+
+const usersColl = process.env.MONGODB_USERS_COLLECTION;
+
+/**
+ * Get user information by Object ID from AzureAD
+ * @param aadObjectId
+ * @returns data response containing the user with given aadObjectId, if any, as data.
+ *  */
+export async function getUser(aadObjectId: string): Promise<IDataResponse<IAppUserWithId>> {
      try {
-          const client = await clientPromise;
-          const db = client.db(DATABASE);
-          const foundUsers = await db.collection(usersCollection).find({ aadObjectId: aadObjectId }).toArray();
+          const userCollection = (await getDbConnection()).collection<IAppUser>(usersColl);
+          const foundUsers: IAppUserWithId[] = await userCollection.find<IAppUserWithId>({ aadObjectId: aadObjectId }).toArray();
           if (foundUsers.length > 1) {
-               queryResult = { status: "error", data: null, error: `Found multiple users with same aadObjectId: ${aadObjectId}.` };
-          } else {
-               queryResult = {
-                    status: "ok",
-                    data: foundUsers[0]
-                         ? { _id: foundUsers[0]._id, aadObjectId: foundUsers[0].aadObjectId, aadUsername: foundUsers[0].aadUsername }
-                         : undefined,
-               };
+               return { status: "error", data: null, error: `Found multiple users with same aadObjectId: ${aadObjectId}.` };
           }
-          return queryResult;
+          return {
+               status: "ok",
+               data: foundUsers[0] ?? null,
+          };
      } catch (error: any) {
-          queryResult = { status: "error", data: null, error: error };
-          return queryResult;
+          console.error("Error getting user. ", error);
+          return { status: "error", data: null, error: error };
      }
 }
 
-export async function saveNewUser(user: Partial<IAppUser>): Promise<IDataResponse<Partial<IAppUser>>> {
+/**
+ * Save new user into database
+ * @param user
+ * @returns data response containing user object with created ObjectId as data.
+ */
+export async function saveNewUser(user: IAppUser): Promise<IDataResponse<IAppUserWithId>> {
      // console.log("Starting to save user");
-     let saveResponse: IDataResponse<Partial<IAppUser>>;
      try {
-          const client = await clientPromise;
-          const db = client.db(DATABASE);
-
-          const newUser = await db.collection(usersCollection).insertOne(user);
+          const userCollection = (await getDbConnection()).collection<IAppUser>(usersColl);
+          const newUser: InsertOneResult<IAppUser> = await userCollection.insertOne(user);
           //   console.log(`New user with oid ${newUser.insertedId} inserted.`);
 
-          return (saveResponse = { status: "ok", data: { ...user, _id: newUser.insertedId } });
+          return { status: "ok", data: { ...user, _id: newUser.insertedId } };
      } catch (error: any) {
-          // console.error("Error inserting new user. ", error);
-          return (saveResponse = { status: "error", data: null, error: error });
+          console.error("Error inserting new user. ", error);
+          return { status: "error", data: null, error: error };
      }
 }
 
-export async function updateUser(user: Partial<IAppUser>): Promise<IDataResponse<Partial<IAppUser>>> {
+/**
+ * Updates user data into database
+ * @param user
+ * @returns data response containing the given user as data, when successfully updated.
+ */
+export async function updateUser(user: IAppUserWithId): Promise<IDataResponse<IAppUserWithId>> {
      // console.log("Starting to update user");
-     let saveResponse: IDataResponse<Partial<IAppUser>>;
      try {
-          const client = await clientPromise;
-          const db = client.db(DATABASE);
-
-          const updatedUser = await db
-               .collection(usersCollection)
-               .updateOne({ _id: user._id }, { $set: { aadUsername: user.aadUsername, givenName: user.givenName, surname: user.surname } });
-          //   console.log(`User ${updatedUser} updated.`);
-
-          return (saveResponse = { status: "ok", data: user });
+          const userCollection = (await getDbConnection()).collection<IAppUser>(usersColl);
+          const updateResult: UpdateResult<IAppUser> = await userCollection.updateOne(
+               { _id: new ObjectId(user._id) },
+               { $set: { aadUsername: user.aadUsername, givenName: user.givenName, surname: user.surname } }
+          );
+          //   console.log("User updated. ", updateResult);
+          return { status: "ok", data: user };
      } catch (error: any) {
-          // console.error("Error updating user. ", error);
-          return (saveResponse = { status: "error", data: null, error: error });
+          console.error("Error updating user. ", error);
+          return { status: "error", data: null, error: error };
      }
 }

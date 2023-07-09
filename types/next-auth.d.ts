@@ -50,7 +50,7 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
      interface JWT {
-          _id: string | null;
+          _id?: string | null;
           name?: string | null;
           firstName: string | null;
           lastName: string | null;

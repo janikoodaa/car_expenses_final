@@ -1,8 +1,9 @@
 import { Profile, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import { getUser, saveNewUser, updateUser } from "../library/mongoDB/userData";
+import { IAppUser, IAppUserWithId, getUser, saveNewUser, updateUser } from "../library/mongoDB/userData";
 import { getUserFromGraph } from "../library/msGraph/getUserFromGraph";
+import IDataResponse from "@/types/dataResponse";
 
 export const authOptions = {
      providers: [
@@ -28,9 +29,10 @@ export const authOptions = {
                // if (token) console.log("token exists in async jwt(), ", token);
 
                if (profile && account) {
-                    const graphData: IDataResponse<Partial<IAppUser>> = await getUserFromGraph(account.access_token!);
+                    /** First get up-to-date user data from MS Graph and add data to JWT */
+                    const graphData: IDataResponse<IAppUser> = await getUserFromGraph(account.access_token!);
                     if (graphData.status === "ok") {
-                         const userFromGraph: Partial<IAppUser> = graphData.data!;
+                         const userFromGraph: IAppUser = graphData.data!;
                          token.firstName = userFromGraph.givenName!;
                          token.lastName = userFromGraph.surname!;
                          token.initials = userFromGraph.givenName!.substring(0, 1) + userFromGraph.surname!.substring(0, 1);
@@ -42,51 +44,55 @@ export const authOptions = {
                          token.error = "Error getting user data from Graph.";
                     }
 
-                    const foundUser: IDataResponse<Partial<IAppUser>> = await getUser(profile.oid!);
+                    /** Next check, if the user already exists in app */
+                    const foundUser: IDataResponse<IAppUserWithId> = await getUser(profile.oid!);
                     console.log("Found User: ", foundUser);
-
-                    let userIdInApp = foundUser.data?._id;
 
                     if (foundUser.status === "error") {
                          console.error(`Error getting user with aadObjectId ${profile.oid}. Error: ${foundUser.error}`);
                          token.error = foundUser.error;
                     }
 
+                    if (foundUser.status === "ok" && foundUser.data) {
+                         token._id = foundUser.data._id.toString();
+                    }
+
+                    /** If user is new to app, insert user data to database */
                     if (foundUser.status === "ok" && !foundUser.data) {
-                         const saveResult: IDataResponse<Partial<IAppUser>> = await saveNewUser({
+                         const saveResult: IDataResponse<IAppUserWithId> = await saveNewUser({
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
                               givenName: token.firstName,
                               surname: token.lastName,
                          });
 
-                         userIdInApp = saveResult.data?._id;
-
                          if (saveResult.status === "error") {
                               console.error("Saving new user failed. ", saveResult.error);
                               token.error += " Saving new user failed.";
+                         } else {
+                              token._id = saveResult.data!._id.toString();
                          }
                     } else if (
+                         /** If user is already existing, check if some of the user data has changed compared to Azure AD and update, if necessary */
                          foundUser.status === "ok" &&
-                         (foundUser.data?.aadUsername !== profile.preferred_username ||
-                              foundUser.data?.givenName !== token.firstName ||
-                              foundUser.data?.surname !== token.lastName)
+                         foundUser.data &&
+                         (foundUser.data.aadUsername !== profile.preferred_username ||
+                              foundUser.data.givenName !== token.firstName ||
+                              foundUser.data.surname !== token.lastName)
                     ) {
-                         // console.log("Need to update the user's email.");
-                         const updateResult: IDataResponse<Partial<IAppUser>> = await updateUser({
-                              _id: foundUser.data?._id,
+                         const updateResult: IDataResponse<IAppUserWithId> = await updateUser({
+                              _id: foundUser.data._id,
                               aadObjectId: profile.oid!,
                               aadUsername: profile.preferred_username!,
                               givenName: token.firstName,
                               surname: token.lastName,
                          });
                          if (updateResult.status === "error") {
-                              // console.error("Updating user data failed. ", updateResult.error);
+                              console.error("Updating user data failed. ", updateResult.error);
                               token.error += " Updating user data failed.";
                          }
                     }
 
-                    token._id = userIdInApp;
                     token.aadObjectId = profile.oid;
                     token.aadUsername = profile.preferred_username;
                     token.accessToken = account.access_token!;
@@ -101,7 +107,7 @@ export const authOptions = {
           async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
                // console.log("Setting data from token to session.");
 
-               session.user._id = token._id;
+               session.user._id = token._id ?? null;
                session.user.firstName = token.firstName;
                session.user.lastName = token.lastName;
                session.user.initials = token.initials;
