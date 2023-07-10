@@ -77,8 +77,8 @@ export default function AddVehicleCard() {
                </div>
                {modalOpen ? (
                     <div className="fixed inset-0 h-full w-full overflow-y-auto backdrop-blur">
-                         <div className="relative top-10 z-10 mx-auto max-h-[80%] overflow-y-auto rounded-md border-2 border-solid border-slate-600 bg-slate-300 shadow-md md:w-3/4 lg:w-1/2">
-                              <div className="fixed w-full bg-slate-300 px-4 py-2 font-bold">
+                         <div className="relative top-10 z-20 mx-auto max-h-[80%] overflow-y-auto rounded-md border-2 border-solid border-slate-600 bg-slate-300 shadow-md md:w-3/4 lg:w-1/2">
+                              <div className="fixed bg-slate-300 px-4 py-2 font-bold">
                                    <h1>Lisää uusi ajoneuvo</h1>
                               </div>
                               <hr />
