@@ -14,7 +14,7 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
      if (!session) return null;
 
      const response: IDataResponse<IVehicle> = await getVehicleById(vehicleId, session.user._id!);
-     console.log("vehicle page response: ", response);
+     // console.log("vehicle page response: ", response);
 
      if (response.status === "ok" && response.data) {
           const vehicle: IVehicle = response.data;
@@ -108,11 +108,8 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                                    <tbody>
                                         {coUsers.map((cu, idx) => {
                                              return (
-                                                  <tr>
-                                                       <td
-                                                            key={idx}
-                                                            className="w-1/2 px-2 text-right"
-                                                       >
+                                                  <tr key={idx}>
+                                                       <td className="w-1/2 px-2 text-right">
                                                             {cu.givenName} {cu.surname}
                                                        </td>
                                                        <td className="w-1/2 px-2 text-left">{cu.aadUsername}</td>
