@@ -11,7 +11,7 @@ export interface IVehicle {
      registeringDate: Date | null;
      registerNumber: string | undefined;
      inUseFrom: Date;
-     InUseTo: Date | null;
+     inUseTo: Date | null;
      primaryFuel: "95E10" | "98E5" | "Diesel" | undefined;
      active: boolean;
      owner: Types.ObjectId | IAppUser;
@@ -65,7 +65,7 @@ const vehicleSchema = new Schema<IVehicle>(
                min: new Date("1950-01-01"),
                max: new Date(),
           },
-          InUseTo: {
+          inUseTo: {
                type: Date,
                min: new Date("1950-01-01"),
                max: new Date(),

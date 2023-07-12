@@ -21,13 +21,19 @@ export async function POST(request: NextRequest): Promise<Response> {
                registeringDate: new Date(req.registeringDate),
           };
           const dbResponse: IDataResponse<IVehicle> = await insertNewVehicle(vehicleToInsert);
-          //   console.log("Insert result: ", dbResponse);
+          console.log("Insert result in api/vehicle method POST: ", dbResponse);
           if (dbResponse.status === "ok") {
-               return new Response(JSON.stringify(dbResponse.data), { status: 201 });
+               return new Response(JSON.stringify(dbResponse), { status: 201 });
           } else {
-               return new Response("Palvelimella tapahtui virhe!", { status: 500 });
+               return new Response(JSON.stringify(dbResponse), { status: 500 });
           }
      } catch (error) {
-          return new Response("Palvelimella tapahtui virhe!", { status: 500 });
+          console.error("Unknown error in api/vehicle method POST: ", error);
+          const unknownError: IDataResponse<IVehicle> = {
+               status: "error",
+               data: null,
+               error: { message: "Palvelimella tapahtui tuntematon virhe." },
+          };
+          return new Response(JSON.stringify(unknownError), { status: 500 });
      }
 }

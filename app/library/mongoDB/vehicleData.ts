@@ -82,10 +82,11 @@ export async function insertNewVehicle(vehicle: IVehicle): Promise<IDataResponse
      try {
           // console.log("vehicle param in insertNewVehicle: ", vehicle);
           await dbConnect();
-          const result = new Vehicle(vehicle).save();
-          // console.log("new inserted vehicle: ", insertResult);
+          const result = await new Vehicle(vehicle).save();
+          // console.log("new inserted vehicle: ", result);
           return { status: "ok", data: result };
      } catch (error) {
+          console.error("Error inserting new vehicle in function insertNewVehicle: ", error);
           return { status: "error", data: null, error: error };
      }
 }

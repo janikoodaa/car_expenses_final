@@ -7,6 +7,7 @@ import IDataResponse from "@/types/dataResponse";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
+import { DateTime } from "luxon";
 
 export default async function SingleVehiclePage({ params }: { params: { id: string } }) {
      const session = await getServerSession(authOptions);
@@ -39,12 +40,16 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                                    </tr>
                                    <tr className="h-9 border-b border-b-gray-400">
                                         <th className="w-1/2 px-2 text-right">Käytössä alkaen</th>
-                                        <td className="w-1/2 px-2 text-center">{vehicle.inUseFrom.toLocaleDateString("fi")}</td>
+                                        <td className="w-1/2 px-2 text-center">
+                                             {DateTime.fromJSDate(vehicle.inUseFrom).setLocale("fi-FI").toLocaleString({})}
+                                        </td>
                                    </tr>
-                                   {vehicle.InUseTo ? (
+                                   {vehicle.inUseTo ? (
                                         <tr className="h-9 border-b border-b-gray-400">
                                              <th className="w-1/2 px-2 text-right">Käytöstä poisto</th>
-                                             <td className="w-1/2 px-2 text-center">{vehicle.InUseTo.toLocaleDateString("fi")}</td>
+                                             <td className="w-1/2 px-2 text-center">
+                                                  {DateTime.fromJSDate(vehicle.inUseTo).setLocale("fi-FI").toLocaleString({})}
+                                             </td>
                                         </tr>
                                    ) : null}
                                    <tr className="h-9 border-b border-b-gray-400">
@@ -60,7 +65,9 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                                    {vehicle.registeringDate ? (
                                         <tr className="h-9 border-b border-b-gray-400">
                                              <th className="w-1/2 px-2 text-right">Rekisteröintipäivä</th>
-                                             <td className="w-1/2 px-2 text-center">{vehicle.registeringDate?.toLocaleDateString("fi")}</td>
+                                             <td className="w-1/2 px-2 text-center">
+                                                  {DateTime.fromJSDate(vehicle.registeringDate).setLocale("fi-FI").toLocaleString({})}
+                                             </td>
                                         </tr>
                                    ) : null}
                               </tbody>
@@ -131,11 +138,11 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                                    <hr />
                                    <div className="mt-2 flex flex-row justify-center gap-2">
                                         <Button
-                                             className="bg-red-600 text-slate-100"
+                                             variant="warning"
                                              buttonText="Poista käytöstä"
                                         />
                                         <Button
-                                             className="bg-slate-500 text-slate-100"
+                                             variant="secondary"
                                              buttonText="Muokkaa"
                                         />
                                    </div>
