@@ -1,7 +1,7 @@
 import { GrStatusGoodSmall } from "react-icons/gr";
 import Image from "next/image";
 import Link from "next/link";
-import { IVehicle } from "../models/Vehicle";
+import { IVehicle } from "../library/models/Vehicle";
 
 export async function VehicleCard({ vehicle }: { vehicle: IVehicle }): Promise<JSX.Element> {
      let header = `${vehicle.registerNumber}, ${vehicle.make} ${vehicle.model}`;

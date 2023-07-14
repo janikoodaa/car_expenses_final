@@ -1,6 +1,6 @@
-import GrantedVehiclesSection from "../library/uiComponents/grantedVehiclesCard";
-import OwnedVehiclesSection from "../library/uiComponents/ownedVehiclesCard";
-import RetiredVehiclesSection from "../library/uiComponents/retiredVehiclesCard";
+import GrantedVehiclesSection from "./grantedVehiclesCard";
+import OwnedVehiclesSection from "./ownedVehiclesCard";
+import RetiredVehiclesSection from "./retiredVehiclesCard";
 
 export default function VehiclesPage(): JSX.Element {
      return (

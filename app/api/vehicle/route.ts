@@ -17,8 +17,8 @@ export async function POST(request: NextRequest): Promise<Response> {
           const vehicleToInsert: IVehicle = {
                ...req,
                owner: new ObjectId(session.user._id!),
-               inUseFrom: new Date(req.inUseFrom),
-               registeringDate: new Date(req.registeringDate),
+               inUseFrom: new Date(req.inUseFromString),
+               registeringDate: new Date(req.registeringDateString),
           };
           const dbResponse: IDataResponse<IVehicle> = await insertNewVehicle(vehicleToInsert);
           console.log("Insert result in api/vehicle method POST: ", dbResponse);

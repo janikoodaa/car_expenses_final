@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../configuration/authOptions";
-import { getRetiredVehiclesForUser } from "../mongoDB/vehicleData";
+import { authOptions } from "../configuration/authOptions";
+import { getRetiredVehiclesForUser } from "../library/mongoDB/vehicleData";
 import { VehicleCard } from "./vehicleCard";
 import IDataResponse from "@/types/dataResponse";
-import { IVehicle } from "../models/Vehicle";
+import { IVehicle } from "../library/models/Vehicle";
 
 /**
  * Section containing cards of vehicles the logged in user has owned or has had right to use
