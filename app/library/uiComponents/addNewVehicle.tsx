@@ -7,6 +7,7 @@ import DatePicker from "./datePickerComponent";
 import Button from "./buttonComponent";
 import { IVehicle } from "../models/Vehicle";
 import { DateTime } from "luxon";
+import Image from "next/image";
 
 interface INewVehicleForm extends IVehicle {
      inUseFromString: string;
@@ -176,13 +177,34 @@ export default function AddVehicleCard() {
                                                   onChange={handleFormChange}
                                              />
                                              <Input
+                                                  name="imageUrl"
+                                                  placeholder={"https://..."}
+                                                  label="Linkki kuvaan"
+                                                  type="text"
+                                                  value={formData.imageUrl ?? ""}
+                                                  onChange={(e: ChangeEvent<HTMLInputElement>) => handleFormChange(e)}
+                                             />
+                                             {formData.imageUrl ? (
+                                                  <div className="">
+                                                       <p className="pl-2 text-sm">Kuvan esikatselu</p>
+                                                       <Image
+                                                            src={encodeURI(formData.imageUrl)}
+                                                            alt={`${formData.make} ${formData.model}`}
+                                                            width={200}
+                                                            height={200}
+                                                            style={{ maxHeight: "100%", width: "auto" }}
+                                                            priority
+                                                       />
+                                                  </div>
+                                             ) : null}
+                                             {/* <Input
                                                   name="vehicleImage"
                                                   placeholder={"Liitä kuva"}
                                                   label="Ajoneuvon kuva"
                                                   type="file"
                                                   // value={formData.registerNumber}
                                                   // onChange={(e: ChangeEvent<HTMLInputElement>) => handleFormChange(e)}
-                                             />
+                                             /> */}
                                              <hr />
                                              <div className="flex w-full columns-2 flex-row justify-evenly gap-4">
                                                   <Button

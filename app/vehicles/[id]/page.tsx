@@ -82,7 +82,9 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                                    priority
                                    className="order-1 col-span-1 rounded-md lg:order-2"
                               />
-                         ) : null}
+                         ) : (
+                              <div className="order-1 mx-4 hidden h-full items-center text-slate-400 lg:order-2 lg:flex">Ei kuvaa</div>
+                         )}
                     </div>
                     <div className="grid w-full grid-cols-1 p-2">
                          <h2 className="rounded-t-md bg-slate-500 p-2 font-bold text-slate-100">Ajoneuvon omistaja</h2>
