@@ -90,3 +90,32 @@ export async function insertNewVehicle(vehicle: IVehicle): Promise<IDataResponse
           return { status: "error", data: null, error: error };
      }
 }
+
+/**
+ * Update existing vehicle into database
+ */
+export async function updateVehicle(vehicle: IVehicle): Promise<IDataResponse<IVehicle>> {
+     try {
+          // console.log("vehicle param in updateVehicle: ", vehicle);
+          await dbConnect();
+          // const result = await new Vehicle(vehicle).save();
+          const vehicleInDb: HydratedDocument<IVehicle> | null = await Vehicle.findOne({
+               owner: vehicle.owner,
+               _id: vehicle._id,
+          });
+
+          if (!vehicleInDb) return { status: "error", data: null, error: "Ajoneuvoa annetulla id:llä ei löytynyt." };
+
+          vehicleInDb.type = vehicle.type;
+          vehicleInDb.make = vehicle.make;
+          vehicleInDb.model = vehicle.model;
+          vehicleInDb.nickName = vehicle.nickName;
+          const result = await vehicleInDb.save();
+
+          // console.log("new inserted vehicle: ", result);
+          return { status: "ok", data: result };
+     } catch (error) {
+          console.error("Error updateing vehicle in function updateVehicle: ", error);
+          return { status: "error", data: null, error: error };
+     }
+}

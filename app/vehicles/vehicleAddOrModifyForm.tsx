@@ -7,6 +7,7 @@ import Button from "../library/uiComponents/buttonComponent";
 import Image from "next/image";
 import { IVehicle } from "../library/models/Vehicle";
 import { ChangeEvent, useState } from "react";
+import Switch from "../library/uiComponents/switchComponent";
 
 export interface IVehicleForm extends IVehicle {
      inUseFromString: string;
@@ -15,8 +16,11 @@ export interface IVehicleForm extends IVehicle {
 
 interface IVehicleFormProps {
      purpose: "add" | "modify";
+     vehicle?: string;
      closeModal?: () => void;
 }
+
+// type VehicleFormProps = { purpose: "add"; closeModal?: () => void } | { purpose: "modify"; vehicle: IVehicle; closeModal?: () => void };
 
 const emptyVehicle: Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "inUseToString" | "owner"> = {
      make: "",
@@ -46,16 +50,47 @@ const fuelTypes = [
      { value: "Diesel", description: "Diesel" },
 ];
 
-export default function AddOrModifyVechile({ purpose, closeModal }: IVehicleFormProps): JSX.Element {
+export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVehicleFormProps): JSX.Element {
+     const v: IVehicle | null = vehicle
+          ? JSON.parse(vehicle, (key, value) => {
+                 //   console.log(`revive key: ${key} typeof key: ${typeof key} & value: ${value} typeof value ${typeof value}`);
+                 //   if (key === ("registeringDate" || "inUseFrom" || "inUseTo") && value !== "") return new Date(value);
+                 if (key === "registeringDate" && value !== "") return new Date(value);
+                 if (key === "inUseFrom" && value !== "") return new Date(value);
+                 if (key === "inUseTo" && value !== "") return new Date(value);
+                 return value;
+            })
+          : null;
+     // console.log("AddOrModifyVechile vehicle to v: ", v);
+     const vehicleToModify: Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner"> | null = v
+          ? ({
+                 ...v,
+                 inUseFromString: DateTime.fromJSDate(v.inUseFrom).toISODate(),
+                 registeringDateString: v.registeringDate ? DateTime.fromJSDate(v.registeringDate).toISODate() : "",
+            } as Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner">)
+          : null;
      const [loading, setLoading] = useState<boolean>(false);
-     const [formData, setFormData] = useState<Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner">>(emptyVehicle);
+     const [formData, setFormData] = useState<Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner">>(
+          vehicleToModify ?? emptyVehicle
+     );
 
-     const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-          //   console.log(`handleFormChange e.target.name: ${e.target.name} and e.target.value: ${e.target.value}`);
+     const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+          // console.log(`handleFormChange e.target.name: ${e.target.name} and e.target.value: ${e.target.value}`);
+          setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+     };
+
+     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+          // console.log(`handleFormChange e.target.name: ${e.target.name} and e.target.value: ${e.target.value}`);
           if (e.target.name === "registeringDateString" || e.target.name === "inUseFromString") {
                setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
           } else if (e.target.name === "registerNumber") {
                setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value.toUpperCase() }));
+          } else if (e.target.name === "active") {
+               setFormData((prev) => ({
+                    ...prev,
+                    [e.target.name]: e.target.checked,
+                    inUseTo: e.target.checked ? null : DateTime.now().startOf("day").toISODate(),
+               }));
           } else {
                setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
           }
@@ -68,15 +103,33 @@ export default function AddOrModifyVechile({ purpose, closeModal }: IVehicleForm
 
      const handleSubmit = async (e: any) => {
           e.preventDefault();
+          const endpoint: string = "/api/vehicle";
           setLoading(true);
-          console.log("New vehicle form data: ", formData);
-          if (formData.type !== undefined && formData.primaryFuel !== undefined) {
-               const res = await fetch("/api/vehicle", {
-                    method: "POST",
+          if (purpose === "add") {
+               console.log("New vehicle form data: ", formData);
+               if (formData.type !== undefined && formData.primaryFuel !== undefined) {
+                    const res = await fetch(endpoint, {
+                         method: "POST",
+                         body: JSON.stringify(formData),
+                         headers: { "Content-Type": "application/json" },
+                    });
+                    //    console.log("Submit res: ", res);
+                    const json = await res.json();
+                    console.log("Submit json: ", json);
+                    setLoading(false);
+                    if (json.status === "ok") {
+                         window.scrollTo({ top: 0 });
+                         window.location.reload();
+                    }
+               }
+          }
+          if (purpose === "modify") {
+               console.log("Vehicle modification form data: ", formData);
+               const res = await fetch(endpoint, {
+                    method: "PUT",
                     body: JSON.stringify(formData),
                     headers: { "Content-Type": "application/json" },
                });
-               //    console.log("Submit res: ", res);
                const json = await res.json();
                console.log("Submit json: ", json);
                setLoading(false);
@@ -96,7 +149,7 @@ export default function AddOrModifyVechile({ purpose, closeModal }: IVehicleForm
                     label="Tyyppi"
                     options={vehicleTypes}
                     value={formData.type}
-                    onChange={handleFormChange}
+                    onChange={handleSelectChange}
                />
                <Input
                     name="make"
@@ -106,7 +159,7 @@ export default function AddOrModifyVechile({ purpose, closeModal }: IVehicleForm
                     type="text"
                     maxLength={20}
                     value={formData.make}
-                    onChange={handleFormChange}
+                    onChange={handleInputChange}
                />
                <Input
                     name="model"
@@ -116,7 +169,7 @@ export default function AddOrModifyVechile({ purpose, closeModal }: IVehicleForm
                     type="text"
                     maxLength={50}
                     value={formData.model}
-                    onChange={handleFormChange}
+                    onChange={handleInputChange}
                />
                <Input
                     name="year"
@@ -127,7 +180,7 @@ export default function AddOrModifyVechile({ purpose, closeModal }: IVehicleForm
                     min={1950}
                     max={DateTime.now().plus({ years: 1 }).get("year")}
                     value={formData.year}
-                    onChange={handleFormChange}
+                    onChange={handleInputChange}
                />
                <Input
                     name="nickName"
@@ -136,7 +189,7 @@ export default function AddOrModifyVechile({ purpose, closeModal }: IVehicleForm
                     type="text"
                     maxLength={20}
                     value={formData.nickName}
-                    onChange={handleFormChange}
+                    onChange={handleInputChange}
                />
                <Input
                     name="registerNumber"
@@ -145,37 +198,44 @@ export default function AddOrModifyVechile({ purpose, closeModal }: IVehicleForm
                     type="text"
                     maxLength={7}
                     value={formData.registerNumber}
-                    onChange={handleFormChange}
+                    onChange={handleInputChange}
                />
                <Select
                     name="primaryFuel"
                     label="Polttoaine"
                     options={fuelTypes}
                     value={formData.primaryFuel}
-                    onChange={handleFormChange}
+                    onChange={handleSelectChange}
                />
                <DatePicker
                     name="registeringDateString"
                     label="Rekisteröintipäivä"
                     dateValue={formData.registeringDateString ?? ""}
                     max={DateTime.now().toISODate() as string}
-                    onChange={handleFormChange}
+                    onChange={handleInputChange}
                />
                <DatePicker
                     name="inUseFromString"
                     label="Käyttöönottopäivä"
                     dateValue={formData.inUseFromString ?? ""}
                     max={DateTime.now().toISODate() as string}
-                    onChange={handleFormChange}
+                    onChange={handleInputChange}
                />
-               {purpose === "modify" ? <p>Aktiivinen: {formData.active.toString()}</p> : null}
+               {purpose === "modify" ? (
+                    <Switch
+                         name="active"
+                         label="Aktiivinen / pois käytöstä"
+                         checked={formData.active}
+                         onChange={handleInputChange}
+                    />
+               ) : null}
                <Input
                     name="imageUrl"
                     placeholder={"https://..."}
                     label="Linkki kuvaan"
                     type="text"
                     value={formData.imageUrl ?? ""}
-                    onChange={handleFormChange}
+                    onChange={handleInputChange}
                />
                {formData.imageUrl ? (
                     <div className="">

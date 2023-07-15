@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
 import { DateTime } from "luxon";
+import ModifyVehicle from "./modifyButton";
 
 export default async function SingleVehiclePage({ params }: { params: { id: string } }) {
      const session = await getServerSession(authOptions);
@@ -138,7 +139,7 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                          {owner._id?.toString() === session.user._id ? (
                               <>
                                    <hr />
-                                   <div className="mt-2 flex flex-row justify-center gap-2">
+                                   {/* <div className="mt-2 flex flex-row justify-center gap-2">
                                         <Button
                                              variant="warning"
                                              buttonText="Poista käytöstä"
@@ -147,7 +148,8 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                                              variant="secondary"
                                              buttonText="Muokkaa"
                                         />
-                                   </div>
+                                   </div> */}
+                                   <ModifyVehicle vehicle={JSON.stringify(vehicle)} />
                               </>
                          ) : null}
                     </div>
