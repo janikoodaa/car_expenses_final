@@ -80,6 +80,8 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                                    width={600}
                                    height={400}
                                    style={{ maxWidth: "80%", height: "auto" }}
+                                   placeholder="blur"
+                                   blurDataURL={encodeURI(vehicle.imageUrl)}
                                    priority
                                    className="order-1 col-span-1 rounded-md lg:order-2"
                               />

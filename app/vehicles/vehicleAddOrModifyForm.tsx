@@ -89,7 +89,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                setFormData((prev) => ({
                     ...prev,
                     [e.target.name]: e.target.checked,
-                    inUseTo: e.target.checked ? null : DateTime.now().startOf("day").toISODate(),
+                    // inUseTo: e.target.checked ? null : DateTime.now().startOf("day").toISODate(),
                }));
           } else {
                setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
