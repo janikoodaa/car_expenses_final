@@ -1,8 +1,10 @@
-import Vehicle, { IVehicle } from "../models/Vehicle";
+import Vehicle, { IVehicle, VehicleWithUsers } from "../models/Vehicle";
 import IDataResponse from "@/types/dataResponse";
 import dbConnect from "../database/dbConnect";
 import { HydratedDocument } from "mongoose";
 import { DateTime } from "luxon";
+import { getUserFromGraphById } from "../msGraph/getUserFromGraph";
+import { IAppUser } from "../models/User";
 
 /**
  * Get vehicles the user owns at the moment
@@ -14,7 +16,7 @@ export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResp
      console.log(`${startTime}, getOwnedVehiclesForUser() with userId=${userId}`);
      try {
           await dbConnect();
-          const vehicles: HydratedDocument<IVehicle>[] = await Vehicle.find({ owner: userId, active: true }).sort({ inUseFrom: -1 });
+          const vehicles: HydratedDocument<IVehicle>[] = await Vehicle.find({ ownerId: userId, active: true }).sort({ inUseFrom: -1 });
           console.log(`${DateTime.now().toISO()}, returning from getOwnedVehiclesForUser(), startTime: ${startTime} - success`);
           return { status: "ok", data: vehicles };
      } catch (error: any) {
@@ -33,7 +35,7 @@ export async function getGrantedVehiclesForUser(userId: string): Promise<IDataRe
      console.log(`${startTime}, getGrantedVehiclesForUser() with userId=${userId}`);
      try {
           await dbConnect();
-          const vehicles: HydratedDocument<IVehicle>[] = await Vehicle.find({ coUsers: userId, active: true }).sort({
+          const vehicles: HydratedDocument<IVehicle>[] = await Vehicle.find({ coUserIds: userId, active: true }).sort({
                inUseFrom: -1,
           });
           console.log(`${DateTime.now().toISO()}, returning from getGrantedVehiclesForUser(), startTime: ${startTime} - success`);
@@ -56,7 +58,7 @@ export async function getRetiredVehiclesForUser(userId: string): Promise<IDataRe
           await dbConnect();
           const vehicles: HydratedDocument<IVehicle>[] = await Vehicle.find({
                active: false,
-               $or: [{ owner: userId }, { coUsers: userId }],
+               $or: [{ ownerId: userId }, { coUserIds: userId }],
           }).sort({ inUseTo: -1 });
           console.log(`${DateTime.now().toISO()}, returning from getRetiredVehiclesForUser(), startTime: ${startTime} - success`);
           return { status: "ok", data: vehicles };
@@ -66,23 +68,58 @@ export async function getRetiredVehiclesForUser(userId: string): Promise<IDataRe
      }
 }
 
+async function getUsers(users: string[]): Promise<IAppUser[]> {
+     const appUsers: IAppUser[] = new Array();
+     await Promise.all(
+          users.map(async (user) => {
+               const userData = await getUserFromGraphById(user);
+               appUsers.push(userData.data!);
+          })
+     );
+     console.log("appUsers: ", appUsers);
+     return appUsers;
+}
+
 /**
  * Get vehicle by id. UserId is needed to protect data so, that only vehicle user has right to, will be returned.
  * @param vehicleId
  * @param userId
  * @returns data response containing vehicle as data
  */
-export async function getVehicleById(vehicleId: string, userId: string): Promise<IDataResponse<IVehicle>> {
+export async function getVehicleById(vehicleId: string, userId: string): Promise<IDataResponse<VehicleWithUsers>> {
      const startTime = DateTime.now().toISO();
      console.log(`${startTime}, getVehicleById() with vehicleId=${vehicleId} and userId=${userId}`);
      try {
           await dbConnect();
-          const vehicle = await Vehicle.findOne({
-               $or: [{ owner: userId }, { coUsers: userId }],
-               _id: vehicleId,
-          }).populate(["owner", "coUsers"]);
+          const vehicle: IVehicle = (
+               await Vehicle.findOne({
+                    $or: [{ ownerId: userId }, { coUserIds: userId }],
+                    _id: vehicleId,
+               })
+          ).toObject();
+          if (!vehicle) return { status: "ok", data: null, error: "Vehicle not found." };
+
+          // Hydrate owner data into vehicle
+          const owner = await getUserFromGraphById(vehicle.ownerId);
+          if (owner.status === "error" || !owner.data) {
+               return { status: "error", data: null, error: "Error getting user data from MS Graph." };
+          }
+          const vehicleWithUsers: VehicleWithUsers = { ...vehicle, owner: owner.data, coUsers: new Array() };
+
+          // If coUsers exist, hydrate them into vehicle
+          if (vehicleWithUsers.coUserIds.length > 0) {
+               await Promise.all(
+                    vehicleWithUsers.coUserIds.map(async (user) => {
+                         const userData = await getUserFromGraphById(user);
+                         if (userData.data) {
+                              vehicleWithUsers.coUsers.push(userData.data);
+                         }
+                    })
+               );
+          }
+
           console.log(`${DateTime.now().toISO()}, returning from getVehicleById(), startTime: ${startTime} - success`);
-          return { status: "ok", data: vehicle };
+          return { status: "ok", data: vehicleWithUsers };
      } catch (error: any) {
           console.error(`${DateTime.now().toISO()}, error in getVehicleById(), startTime: ${startTime}, message: ${error.message}`);
           return { status: "error", data: null, error: error };
@@ -119,7 +156,7 @@ export async function updateVehicle(vehicle: IVehicle): Promise<IDataResponse<IV
      try {
           await dbConnect();
           const vehicleInDb: HydratedDocument<IVehicle> | null = await Vehicle.findOne({
-               owner: vehicle.owner,
+               owner: vehicle.ownerId,
                _id: vehicle._id,
           });
 

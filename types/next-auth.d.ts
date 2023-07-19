@@ -7,9 +7,11 @@ declare module "next-auth" {
       */
      interface Session {
           error?: string | null;
+          accessToken: string;
           user: {
                _id: string | null;
                aadUsername: string | null;
+               aadObjectId: string | null;
                firstName: string | null;
                lastName: string | null;
                initials: string | null;

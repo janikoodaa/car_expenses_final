@@ -13,7 +13,7 @@ export default async function GrantedVehiclesSection(): Promise<JSX.Element | nu
      const session = await getServerSession(authOptions);
      if (!session) return null;
 
-     const grantedVehicles: IDataResponse<IVehicle[]> = await getGrantedVehiclesForUser(session.user._id!);
+     const grantedVehicles: IDataResponse<IVehicle[]> = await getGrantedVehiclesForUser(session.user.aadObjectId!);
      // console.log("ownedVehicles: ", ownedVehicles);
 
      if (grantedVehicles.data?.length === 0) return null;

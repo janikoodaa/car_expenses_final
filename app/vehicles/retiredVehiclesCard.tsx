@@ -13,7 +13,7 @@ export default async function RetiredVehiclesSection(): Promise<JSX.Element | nu
      const session = await getServerSession(authOptions);
      if (!session) return null;
 
-     const retiredVehicles: IDataResponse<IVehicle[]> = await getRetiredVehiclesForUser(session.user._id!);
+     const retiredVehicles: IDataResponse<IVehicle[]> = await getRetiredVehiclesForUser(session.user.aadObjectId!);
      // console.log("ownedVehicles: ", ownedVehicles);
 
      if (retiredVehicles.data?.length === 0) return null;

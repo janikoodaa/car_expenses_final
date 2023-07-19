@@ -1,7 +1,6 @@
 import { Profile, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import { getUser, saveNewUser, updateUser } from "../library/mongoDB/userData";
 import { getUserFromGraph } from "../library/msGraph/getUserFromGraph";
 import IDataResponse from "@/types/dataResponse";
 import { IAppUser } from "../library/models/User";
@@ -45,56 +44,6 @@ export const authOptions = {
                          token.error = "Error getting user data from Graph.";
                     }
 
-                    /** Next check, if the user already exists in app */
-                    const foundUser: IDataResponse<IAppUser> = await getUser(profile.oid!);
-                    console.log("Found User: ", foundUser);
-
-                    if (foundUser.status === "error") {
-                         console.error(`Error getting user with aadObjectId ${profile.oid}. Error: ${foundUser.error}`);
-                         token.error = foundUser.error;
-                    }
-
-                    if (foundUser.status === "ok" && foundUser.data) {
-                         token._id = foundUser.data._id!.toString();
-                    }
-
-                    /** If user is new to app, insert user data to database */
-                    if (graphData.status === "ok" && foundUser.status === "ok" && !foundUser.data) {
-                         const saveResult: IDataResponse<IAppUser> = await saveNewUser({
-                              aadObjectId: profile.oid!,
-                              aadUsername: profile.preferred_username!,
-                              givenName: token.firstName,
-                              surname: token.lastName,
-                         });
-
-                         if (saveResult.status === "error") {
-                              console.error("Saving new user failed. ", saveResult.error);
-                              token.error += " Saving new user failed.";
-                         } else {
-                              token._id = saveResult.data!._id!.toString();
-                         }
-                    } else if (
-                         /** If user is already existing, check if some of the user data has changed compared to Azure AD and update, if necessary */
-                         graphData.status === "ok" &&
-                         foundUser.status === "ok" &&
-                         foundUser.data &&
-                         (foundUser.data.aadUsername !== profile.preferred_username ||
-                              foundUser.data.givenName !== token.firstName ||
-                              foundUser.data.surname !== token.lastName)
-                    ) {
-                         const updateResult: IDataResponse<IAppUser> = await updateUser({
-                              _id: foundUser.data._id,
-                              aadObjectId: profile.oid!,
-                              aadUsername: profile.preferred_username!,
-                              givenName: token.firstName,
-                              surname: token.lastName,
-                         });
-                         if (updateResult.status === "error") {
-                              console.error("Updating user data failed. ", updateResult.error);
-                              token.error += " Updating user data failed.";
-                         }
-                    }
-
                     token.aadObjectId = profile.oid;
                     token.aadUsername = profile.preferred_username;
                     token.accessToken = account.access_token!;
@@ -114,6 +63,8 @@ export const authOptions = {
                session.user.lastName = token.lastName;
                session.user.initials = token.initials;
                session.user.aadUsername = token.aadUsername!;
+               session.user.aadObjectId = token.aadObjectId!;
+               session.accessToken = token.accessToken;
                session.error = token.error;
 
                return session;

@@ -10,8 +10,8 @@ export default async function User(): Promise<JSX.Element> {
      // Check that there's valid session before further actions
      if (!session) return <div>Forbidden</div>;
 
-     const ownedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getOwnedVehiclesForUser(session.user._id!);
-     const privilegedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getGrantedVehiclesForUser(session.user._id!);
+     const ownedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getOwnedVehiclesForUser(session.user.aadObjectId!);
+     const privilegedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getGrantedVehiclesForUser(session.user.aadObjectId!);
      const resolvedPromises: IDataResponse<IVehicle[]>[] = await Promise.all([ownedVehiclesPromise, privilegedVehiclesPromise]);
      const ownedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[0];
      const privilegedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[1];
@@ -25,6 +25,7 @@ export default async function User(): Promise<JSX.Element> {
                          <li>Sukunimi: {session.user.lastName}</li>
                          <li>Nimikirjaimet: {session.user.initials}</li>
                          <li>Sähköposti: {session.user.email}</li>
+                         <li>Käyttäjä ID: {session.user.aadObjectId}</li>
                     </ul>
                     <OwnedVehiclesList vehicles={ownedVehicles.data} />
                     <PrivilegedVehiclesList vehicles={privilegedVehicles.data} />
@@ -45,7 +46,7 @@ function OwnedVehiclesList({ vehicles }: { vehicles: IVehicle[] | null }): JSX.E
      return (
           <>
                <br />
-               <h2>Käyttäjän omistamat autot</h2>
+               <h2>Käyttäjän omistamat ajoneuvot</h2>
                <ul>{ownedVehiclesList}</ul>
           </>
      );
@@ -63,7 +64,7 @@ function PrivilegedVehiclesList({ vehicles }: { vehicles: IVehicle[] | null }): 
      return (
           <>
                <br />
-               <h2>Käyttäjän muut käytössä olevat autot</h2>
+               <h2>Käyttäjän muut käytössä olevat ajoneuvot</h2>
                <ul>{privilegedVehiclesList}</ul>
           </>
      );

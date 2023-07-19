@@ -15,9 +15,14 @@ export interface IVehicle {
      inUseTo: Date | null;
      primaryFuel: "95E10" | "98E5" | "Diesel" | undefined;
      active: boolean;
-     owner: Types.ObjectId | IAppUser;
-     coUsers: Types.ObjectId[] | IAppUser[];
+     ownerId: string;
+     coUserIds: string[];
      imageUrl: string | null;
+}
+
+export interface VehicleWithUsers extends IVehicle {
+     owner: IAppUser;
+     coUsers: IAppUser[];
 }
 
 const vehicleSchema = new Schema<IVehicle>(
@@ -78,13 +83,12 @@ const vehicleSchema = new Schema<IVehicle>(
                required: true,
                default: true,
           },
-          owner: {
-               type: Schema.Types.ObjectId,
-               ref: "User",
+          ownerId: {
+               type: String,
+               required: true,
           },
-          coUsers: {
-               type: [Schema.Types.ObjectId],
-               ref: "User",
+          coUserIds: {
+               type: [String],
           },
           imageUrl: {
                type: String,
