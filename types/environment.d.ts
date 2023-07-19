@@ -6,6 +6,9 @@ declare global {
                MONGODB_USERS_COLLECTION: string;
                MONGODB_VEHICLES_COLLECTION: string;
                MONGODB_VEHICLES_VIEW: string;
+               ENCRYPTION_KEY: string;
+               ENCRYPTION_INITIALIZATION_VECTOR: string;
+               ENCRYPTION_ALGORITHM: string;
           }
      }
 }

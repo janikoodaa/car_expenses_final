@@ -1,6 +1,7 @@
 import { Schema, Types, model, models } from "mongoose";
 import { IAppUser } from "./User";
 import { DateTime } from "luxon";
+import { decryptString } from "../mongoDB/encryptData";
 
 export interface IVehicle {
      _id?: Types.ObjectId;
@@ -11,6 +12,7 @@ export interface IVehicle {
      year: number;
      registeringDate: Date | null;
      registerNumber: string | undefined;
+     registerNumberPlain: string | undefined;
      inUseFrom: Date;
      inUseTo: Date | null;
      primaryFuel: "95E10" | "98E5" | "Diesel" | undefined;
@@ -58,10 +60,6 @@ const vehicleSchema = new Schema<IVehicle>(
           },
           registerNumber: {
                type: String,
-               uppercase: true,
-               minLength: 4,
-               maxlength: 7,
-               match: /[A-Z0-9]+\-[A-Z0-9]+/,
           },
           inUseFrom: {
                type: Date,
@@ -95,8 +93,14 @@ const vehicleSchema = new Schema<IVehicle>(
                default: null,
           },
      },
-     { timestamps: true }
+     {
+          timestamps: true,
+     }
 );
+
+vehicleSchema.virtual("registerNumberPlain").get(function () {
+     return this.registerNumber ? decryptString(this.registerNumber) : "";
+});
 
 vehicleSchema.pre("validate", function (next) {
      if (this.registeringDate && this.registeringDate > this.inUseFrom) {

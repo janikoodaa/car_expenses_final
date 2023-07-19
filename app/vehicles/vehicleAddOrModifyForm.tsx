@@ -9,7 +9,8 @@ import { IVehicle } from "../library/models/Vehicle";
 import { ChangeEvent, useState } from "react";
 import Switch from "../library/uiComponents/switchComponent";
 
-export interface IVehicleForm extends Omit<IVehicle, "ownerId" | "inUseFrom" | "registeringDate" | "inUseTo" | "inUseToString" | "owner"> {
+export interface IVehicleForm
+     extends Omit<IVehicle, "ownerId" | "inUseFrom" | "registeringDate" | "inUseTo" | "inUseToString" | "owner" | "registerNumberPlain"> {
      inUseFromString: string;
      registeringDateString: string;
 }
@@ -19,8 +20,6 @@ interface IVehicleFormProps {
      vehicle?: string;
      closeModal?: () => void;
 }
-
-// type VehicleFormProps = { purpose: "add"; closeModal?: () => void } | { purpose: "modify"; vehicle: IVehicle; closeModal?: () => void };
 
 const emptyVehicle: IVehicleForm = {
      make: "",

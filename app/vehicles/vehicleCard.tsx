@@ -4,11 +4,11 @@ import Link from "next/link";
 import { IVehicle } from "../library/models/Vehicle";
 
 export async function VehicleCard({ vehicle }: { vehicle: IVehicle }): Promise<JSX.Element> {
-     let header = `${vehicle.registerNumber}, ${vehicle.make} ${vehicle.model}`;
+     let header = `${vehicle.registerNumberPlain}, ${vehicle.make} ${vehicle.model}`;
      if (vehicle.nickName) {
           header = vehicle.nickName;
-     } else if (vehicle.registerNumber) {
-          header = `${vehicle.registerNumber}, ${vehicle.make} ${vehicle.model}`.substring(0, 20);
+     } else if (vehicle.registerNumberPlain) {
+          header = `${vehicle.registerNumberPlain}, ${vehicle.make} ${vehicle.model}`.substring(0, 20);
      } else {
           header = `${vehicle.make} ${vehicle.model}`.substring(0, 20);
      }

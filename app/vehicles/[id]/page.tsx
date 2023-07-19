@@ -59,7 +59,7 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                               {vehicle.registerNumber ? (
                                    <tr className="h-9 border-b border-b-gray-400">
                                         <th className="w-1/2 px-2 text-right">Rekisteritunnus</th>
-                                        <td className="w-1/2 px-2 text-center">{vehicle.registerNumber}</td>
+                                        <td className="w-1/2 px-2 text-center">{vehicle.registerNumberPlain}</td>
                                    </tr>
                               ) : null}
                               {vehicle.registeringDate ? (

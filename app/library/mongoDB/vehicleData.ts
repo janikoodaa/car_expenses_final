@@ -5,6 +5,7 @@ import { HydratedDocument } from "mongoose";
 import { DateTime } from "luxon";
 import { getUserFromGraphById } from "../msGraph/getUserFromGraph";
 import { IAppUser } from "../models/User";
+import { decryptString, encryptString } from "./encryptData";
 
 /**
  * Get vehicles the user owns at the moment
@@ -96,9 +97,10 @@ export async function getVehicleById(vehicleId: string, userId: string): Promise
                     $or: [{ ownerId: userId }, { coUserIds: userId }],
                     _id: vehicleId,
                })
-          ).toObject();
+          ).toObject({ virtuals: true });
           if (!vehicle) return { status: "ok", data: null, error: "Vehicle not found." };
 
+          console.log("vehicle: ", vehicle);
           // Hydrate owner data into vehicle
           const owner = await getUserFromGraphById(vehicle.ownerId);
           if (owner.status === "error" || !owner.data) {
