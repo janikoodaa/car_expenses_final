@@ -4,8 +4,6 @@ import dbConnect from "../database/dbConnect";
 import { HydratedDocument } from "mongoose";
 import { DateTime } from "luxon";
 import { getUserFromGraphById } from "../msGraph/getUserFromGraph";
-import { IAppUser } from "../models/User";
-import { decryptString, encryptString } from "./encryptData";
 
 /**
  * Get vehicles the user owns at the moment
@@ -67,18 +65,6 @@ export async function getRetiredVehiclesForUser(userId: string): Promise<IDataRe
           console.error(`${DateTime.now().toISO()}, error in getRetiredVehiclesForUser(), startTime: ${startTime}, message: ${error.message}`);
           return { status: "error", data: null, error: error };
      }
-}
-
-async function getUsers(users: string[]): Promise<IAppUser[]> {
-     const appUsers: IAppUser[] = new Array();
-     await Promise.all(
-          users.map(async (user) => {
-               const userData = await getUserFromGraphById(user);
-               appUsers.push(userData.data!);
-          })
-     );
-     console.log("appUsers: ", appUsers);
-     return appUsers;
 }
 
 /**
@@ -158,7 +144,7 @@ export async function updateVehicle(vehicle: IVehicle): Promise<IDataResponse<IV
      try {
           await dbConnect();
           const vehicleInDb: HydratedDocument<IVehicle> | null = await Vehicle.findOne({
-               owner: vehicle.ownerId,
+               ownerId: vehicle.ownerId,
                _id: vehicle._id,
           });
 
@@ -174,7 +160,7 @@ export async function updateVehicle(vehicle: IVehicle): Promise<IDataResponse<IV
           vehicleInDb.registeringDate = vehicle.registeringDate;
           vehicleInDb.registerNumber = vehicle.registerNumber;
           vehicleInDb.inUseFrom = vehicle.inUseFrom;
-          vehicleInDb.inUseTo = vehicle.inUseTo;
+          // vehicleInDb.inUseTo = vehicle.inUseTo;
           vehicleInDb.primaryFuel = vehicle.primaryFuel;
           if (vehicleInDb.active !== vehicle.active) {
                vehicleInDb.inUseTo = vehicle.active ? null : DateTime.utc().toJSDate();

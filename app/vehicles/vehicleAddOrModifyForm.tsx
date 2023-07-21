@@ -10,7 +10,7 @@ import { ChangeEvent, useState } from "react";
 import Switch from "../library/uiComponents/switchComponent";
 
 export interface IVehicleForm
-     extends Omit<IVehicle, "ownerId" | "inUseFrom" | "registeringDate" | "inUseTo" | "inUseToString" | "owner" | "registerNumberPlain"> {
+     extends Omit<IVehicle, "ownerId" | "inUseFrom" | "registeringDate" | "inUseTo" | "inUseToString" | "owner" | "registerNumber"> {
      inUseFromString: string;
      registeringDateString: string;
 }
@@ -30,7 +30,7 @@ const emptyVehicle: IVehicleForm = {
      primaryFuel: undefined,
      registeringDateString: "",
      year: 0,
-     registerNumber: "",
+     registerNumberPlain: "",
      active: true,
      imageUrl: "",
      coUserIds: [],
@@ -191,12 +191,12 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                     onChange={handleInputChange}
                />
                <Input
-                    name="registerNumber"
+                    name="registerNumberPlain"
                     placeholder={"ABC-123"}
                     label="Rekisteritunnus"
                     type="text"
                     maxLength={7}
-                    value={formData.registerNumber}
+                    value={formData.registerNumberPlain}
                     onChange={handleInputChange}
                />
                <Select

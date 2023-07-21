@@ -1,24 +1,27 @@
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/configuration/authOptions";
-import { ObjectId } from "mongodb";
 import { insertNewVehicle, updateVehicle } from "@/app/library/mongoDB/vehicleData";
 import IDataResponse from "@/types/dataResponse";
 import { IVehicle } from "@/app/library/models/Vehicle";
+import { encryptString } from "@/app/library/mongoDB/encryptData";
+import { IVehicleForm } from "@/app/vehicles/vehicleAddOrModifyForm";
 
 export async function POST(request: NextRequest): Promise<Response> {
      try {
           const session = await getServerSession(authOptions);
           if (!session) return new Response("Sinulla ei ole vaadittavaa oikeutta!", { status: 401 });
 
-          const req = await request.json();
-          //   console.log("req in POST: ", req);
+          const req = (await request.json()) as IVehicleForm;
+          // console.log("req in POST: ", req);
 
           const vehicleToInsert: IVehicle = {
                ...req,
-               owner: new ObjectId(session.user._id!),
+               ownerId: session.user.aadObjectId!,
                inUseFrom: new Date(req.inUseFromString),
-               registeringDate: new Date(req.registeringDateString),
+               registeringDate: req.registeringDateString ? new Date(req.registeringDateString) : null,
+               registerNumber: req.registerNumberPlain ? encryptString(req.registerNumberPlain) : "",
+               inUseTo: null,
           };
           const dbResponse: IDataResponse<IVehicle> = await insertNewVehicle(vehicleToInsert);
           console.log("Insert result in /api/vehicle method POST: ", dbResponse);
@@ -43,16 +46,18 @@ export async function PUT(request: NextRequest): Promise<Response> {
           const session = await getServerSession(authOptions);
           if (!session) return new Response("Sinulla ei ole vaadittavaa oikeutta!", { status: 401 });
 
-          const req = await request.json();
+          const req = (await request.json()) as IVehicleForm;
           //   console.log("req in PUT: ", req);
 
           const modifiedVehicle: IVehicle = {
                ...req,
-               owner: new ObjectId(session.user._id!),
+               ownerId: session.user.aadObjectId!,
                inUseFrom: new Date(req.inUseFromString),
                registeringDate: new Date(req.registeringDateString),
+               registerNumber: req.registerNumberPlain ? encryptString(req.registerNumberPlain) : "",
+               inUseTo: null,
           };
-          console.log("modifiedVehicle from req: ", modifiedVehicle);
+          // console.log("modifiedVehicle from req: ", modifiedVehicle);
 
           const dbResponse: IDataResponse<IVehicle> = await updateVehicle(modifiedVehicle);
           console.log("Insert result in /api/vehicle method PUT: ", dbResponse);
