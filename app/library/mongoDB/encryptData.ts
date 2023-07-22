@@ -1,3 +1,6 @@
+/**
+ * Warning!! Changing these functions might result in losing encrypted data!!
+ */
 import crypto from "crypto";
 
 const encryptionKey = process.env.ENCRYPTION_KEY;
