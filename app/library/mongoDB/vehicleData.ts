@@ -4,13 +4,14 @@ import dbConnect from "../database/dbConnect";
 import { HydratedDocument } from "mongoose";
 import { DateTime } from "luxon";
 import { getUserFromGraphById } from "../msGraph/getUserFromGraph";
+import { cache } from "react";
 
 /**
  * Get vehicles the user owns at the moment
  * @param userId
  * @returns data response containing array of vehicles as data
  */
-export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
+export const getOwnedVehiclesForUser = cache(async (userId: string): Promise<IDataResponse<IVehicle[]>> => {
      const startTime = DateTime.now().toISO();
      console.log(`${startTime}, getOwnedVehiclesForUser() with userId=${userId}`);
      try {
@@ -22,14 +23,14 @@ export async function getOwnedVehiclesForUser(userId: string): Promise<IDataResp
           console.error(`${DateTime.now().toISO()}, error in getOwnedVehiclesForUser(), startTime: ${startTime}, message: ${error.message}`);
           return { status: "error", data: null, error: error };
      }
-}
+});
 
 /**
  * Get vehicles the user has right to use at the moment
  * @param userId
  * @returns data response containing array of vehicles as data
  */
-export async function getGrantedVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
+export const getGrantedVehiclesForUser = cache(async (userId: string): Promise<IDataResponse<IVehicle[]>> => {
      const startTime = DateTime.now().toISO();
      console.log(`${startTime}, getGrantedVehiclesForUser() with userId=${userId}`);
      try {
@@ -43,14 +44,14 @@ export async function getGrantedVehiclesForUser(userId: string): Promise<IDataRe
           console.error(`${DateTime.now().toISO()}, error in getGrantedVehiclesForUser(), startTime: ${startTime}, message: ${error.message}`);
           return { status: "error", data: null, error: error };
      }
-}
+});
 
 /**
  * Get vehicles the user has owned or has had right to use
  * @param userId
  * @returns data response containing array of vehicles as data
  */
-export async function getRetiredVehiclesForUser(userId: string): Promise<IDataResponse<IVehicle[]>> {
+export const getRetiredVehiclesForUser = cache(async (userId: string): Promise<IDataResponse<IVehicle[]>> => {
      const startTime = DateTime.now().toISO();
      console.log(`${startTime}, getRetiredVehiclesForUser() with userId=${userId}`);
      try {
@@ -65,7 +66,7 @@ export async function getRetiredVehiclesForUser(userId: string): Promise<IDataRe
           console.error(`${DateTime.now().toISO()}, error in getRetiredVehiclesForUser(), startTime: ${startTime}, message: ${error.message}`);
           return { status: "error", data: null, error: error };
      }
-}
+});
 
 /**
  * Get vehicle by id. UserId is needed to protect data so, that only vehicle user has right to, will be returned.
@@ -73,7 +74,7 @@ export async function getRetiredVehiclesForUser(userId: string): Promise<IDataRe
  * @param userId
  * @returns data response containing vehicle as data
  */
-export async function getVehicleById(vehicleId: string, userId: string): Promise<IDataResponse<VehicleWithUsers>> {
+export const getVehicleById = cache(async (vehicleId: string, userId: string): Promise<IDataResponse<VehicleWithUsers>> => {
      const startTime = DateTime.now().toISO();
      console.log(`${startTime}, getVehicleById() with vehicleId=${vehicleId} and userId=${userId}`);
      try {
@@ -112,7 +113,7 @@ export async function getVehicleById(vehicleId: string, userId: string): Promise
           console.error(`${DateTime.now().toISO()}, error in getVehicleById(), startTime: ${startTime}, message: ${error.message}`);
           return { status: "error", data: null, error: error };
      }
-}
+});
 
 /**
  * Save new vehicle into database

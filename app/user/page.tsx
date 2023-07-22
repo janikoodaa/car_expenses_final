@@ -4,6 +4,11 @@ import { getOwnedVehiclesForUser, getGrantedVehiclesForUser } from "../library/m
 import IDataResponse from "@/types/dataResponse";
 import { IVehicle } from "../library/models/Vehicle";
 
+export const metadata = {
+     title: "Kul(k)upeli - minä",
+     description: "Kirjautuneen käyttäjän tiedot.",
+};
+
 export default async function User(): Promise<JSX.Element> {
      const session = await getServerSession(authOptions);
 
@@ -17,20 +22,18 @@ export default async function User(): Promise<JSX.Element> {
      const privilegedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[1];
 
      return (
-          <>
-               <div className="mt-4 flex w-full columns-1 flex-col items-center gap-4">
-                    <h2 className="">Täältä löytyy käyttäjän perustiedot.</h2>
-                    <ul className="">
-                         <li>Etunimi: {session.user.firstName}</li>
-                         <li>Sukunimi: {session.user.lastName}</li>
-                         <li>Nimikirjaimet: {session.user.initials}</li>
-                         <li>Sähköposti: {session.user.email}</li>
-                         <li>Käyttäjä ID: {session.user.aadObjectId}</li>
-                    </ul>
-                    <OwnedVehiclesList vehicles={ownedVehicles.data} />
-                    <PrivilegedVehiclesList vehicles={privilegedVehicles.data} />
-               </div>
-          </>
+          <div className="mt-4 flex w-full columns-1 flex-col items-center gap-4 pb-10">
+               <h2 className="">Täältä löytyy käyttäjän perustiedot.</h2>
+               <ul className="">
+                    <li>Etunimi: {session.user.firstName}</li>
+                    <li>Sukunimi: {session.user.lastName}</li>
+                    <li>Nimikirjaimet: {session.user.initials}</li>
+                    <li>Sähköposti: {session.user.email}</li>
+                    <li>Käyttäjä ID: {session.user.aadObjectId}</li>
+               </ul>
+               <OwnedVehiclesList vehicles={ownedVehicles.data} />
+               <PrivilegedVehiclesList vehicles={privilegedVehicles.data} />
+          </div>
      );
 }
 

@@ -19,7 +19,7 @@ export default async function Navbar(): Promise<JSX.Element> {
                               href={"/"}
                               className="text-xl font-bold"
                          >
-                              Auton kululoki
+                              Kul<span className="text-green-400">k</span>upeli
                          </Link>
                     </li>
                     {!session

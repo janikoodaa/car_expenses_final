@@ -7,6 +7,31 @@ import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
 import { DateTime } from "luxon";
 import ModifyVehicle from "./modifyButton";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+     const session = await getServerSession(authOptions);
+     const vehicleId = params.id;
+
+     if (!session)
+          return {
+               title: "Kul(k)upeli - virhe",
+          };
+
+     // fetch data
+     const response: IDataResponse<VehicleWithUsers> = await getVehicleById(vehicleId, session.user.aadObjectId!);
+
+     if (response.data) {
+          return {
+               title: `Kul(k)upeli - ${response.data?.make} ${response.data?.model}`,
+               description: "",
+          };
+     }
+
+     return {
+          title: "Kul(k)upeli - virhe",
+     };
+}
 
 export default async function SingleVehiclePage({ params }: { params: { id: string } }) {
      const session = await getServerSession(authOptions);
@@ -22,7 +47,7 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
      if (!vehicle) return <div>Ajoneuvon tietoja ei löytynyt. Kokeile päivittää sivu.</div>;
 
      return (
-          <>
+          <div className="pb-10">
                <div className=" grid grid-cols-1 items-center justify-items-center gap-2 px-2 py-2 lg:grid-cols-2">
                     <table className="order-2 col-span-1 w-full lg:order-1">
                          <tbody>
@@ -34,6 +59,12 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                                    <th className="w-1/2 px-2 text-right">Malli</th>
                                    <td className="w-1/2 px-2 text-center">{vehicle.model}</td>
                               </tr>
+                              {vehicle.nickName ? (
+                                   <tr className="h-9 border-b border-b-gray-400">
+                                        <th className="w-1/2 px-2 text-right">Lempinimi</th>
+                                        <td className="w-1/2 px-2 text-center">{vehicle.nickName}</td>
+                                   </tr>
+                              ) : null}
                               <tr className="h-9 border-b border-b-gray-400">
                                    <th className="w-1/2 px-2 text-right">Vuosimalli</th>
                                    <td className="w-1/2 px-2 text-center">{vehicle.year}</td>
@@ -154,6 +185,6 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                          </>
                     ) : null}
                </div>
-          </>
+          </div>
      );
 }
