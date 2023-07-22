@@ -1,13 +1,22 @@
 import mongoose from "mongoose";
 
-const { MONGODB_URI, MONGODB_DATABASE } = process.env;
+const { MONGODB_DATABASE, MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_CLUSTER_URL } = process.env;
 
-if (!MONGODB_URI) {
-     throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+if (!MONGODB_USERNAME) {
+     throw new Error("Please define the MONGODB_USERNAME environment variable inside .env.local");
+}
+if (!MONGODB_PASSWORD) {
+     throw new Error("Please define the MONGODB_PASSWORD environment variable inside .env.local");
+}
+if (!MONGODB_CLUSTER_URL) {
+     throw new Error("Please define the MONGODB_CLUSTER_URL environment variable inside .env.local");
 }
 if (!MONGODB_DATABASE) {
      throw new Error("Please define the MONGODB_DATABASE environment variable inside .env.local");
 }
+
+const userName = encodeURIComponent(MONGODB_USERNAME);
+const password = encodeURIComponent(MONGODB_PASSWORD);
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -30,9 +39,11 @@ async function dbConnect() {
                bufferCommands: false,
           };
 
-          cached.promise = mongoose.connect(`${MONGODB_URI}${MONGODB_DATABASE}`, opts).then((mongoose) => {
-               return mongoose;
-          });
+          cached.promise = mongoose
+               .connect(`mongodb+srv://${userName}:${password}@${MONGODB_CLUSTER_URL}${MONGODB_DATABASE}`, opts)
+               .then((mongoose) => {
+                    return mongoose;
+               });
      }
 
      try {
