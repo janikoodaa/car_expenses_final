@@ -19,7 +19,7 @@ export default function SmallScreenNav(): JSX.Element {
                                    href={"/"}
                                    className="flex text-xl font-bold"
                               >
-                                   Auton kululoki
+                                   Kul<span className="text-green-400">k</span>upeli
                               </Link>
                               {status === "unauthenticated" ? (
                                    <SignInButton />
