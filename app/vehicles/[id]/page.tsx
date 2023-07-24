@@ -85,7 +85,7 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                               ) : null}
                               <tr className="h-9 border-b border-b-gray-400">
                                    <th className="w-1/2 px-2 text-right">Polttoaine</th>
-                                   <td className="w-1/2 px-2 text-center">{vehicle.primaryFuel}</td>
+                                   <td className="w-1/2 px-2 text-center">{vehicle.primaryFuel?.typeDescription}</td>
                               </tr>
                               {vehicle.registerNumber ? (
                                    <tr className="h-9 border-b border-b-gray-400">

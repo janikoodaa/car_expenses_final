@@ -1,11 +1,13 @@
 import { Schema, Types, model, models } from "mongoose";
 import { IAppUser } from "./User";
 import { DateTime } from "luxon";
-import { decryptString } from "../mongoDB/encryptData";
+import { decryptString } from "../mongoDB/stringEncryption";
+import FuelTypeModel, { FuelType } from "./FuelType";
+import VehicleTypeModel, { VehicleType } from "./VehicleType";
 
 export interface IVehicle {
      _id?: Types.ObjectId;
-     type: "car" | "bicycle" | "motorcycle" | "van" | undefined;
+     type: VehicleType | undefined;
      make: string;
      model: string;
      nickName: string | undefined;
@@ -15,7 +17,7 @@ export interface IVehicle {
      registerNumberPlain: string | undefined;
      inUseFrom: Date;
      inUseTo: Date | null;
-     primaryFuel: "95E10" | "98E5" | "Diesel" | undefined;
+     primaryFuel: FuelType | undefined;
      active: boolean;
      ownerId: string;
      coUserIds: string[];
@@ -30,10 +32,13 @@ export interface VehicleWithUsers extends IVehicle {
 const vehicleSchema = new Schema<IVehicle>(
      {
           type: {
-               type: String,
-               required: true,
-               enum: ["car", "bicycle", "motorcycle", "van"],
+               type: Schema.Types.ObjectId,
+               ref: VehicleTypeModel,
           },
+          // type: {
+          //      type: String,
+          //      required: true,
+          // },
           make: {
                type: String,
                required: true,
@@ -72,9 +77,8 @@ const vehicleSchema = new Schema<IVehicle>(
                default: null,
           },
           primaryFuel: {
-               type: String,
-               enum: ["95E10", "98E5", "Diesel"],
-               default: null,
+               type: Schema.Types.ObjectId,
+               ref: FuelTypeModel,
           },
           active: {
                type: Boolean,
@@ -94,7 +98,9 @@ const vehicleSchema = new Schema<IVehicle>(
           },
      },
      {
+          collection: "vehicles",
           timestamps: true,
+          virtuals: true,
      }
 );
 

@@ -5,6 +5,7 @@ import { HydratedDocument } from "mongoose";
 import { DateTime } from "luxon";
 import { getUserFromGraphById } from "../msGraph/getUserFromGraph";
 import { cache } from "react";
+import FuelTypeModel from "../models/FuelType";
 
 /**
  * Get vehicles the user owns at the moment
@@ -83,8 +84,9 @@ export const getVehicleById = cache(async (vehicleId: string, userId: string): P
                await Vehicle.findOne({
                     $or: [{ ownerId: userId }, { coUserIds: userId }],
                     _id: vehicleId,
-               })
+               }).populate(["type", "primaryFuel"])
           ).toObject({ virtuals: true });
+
           if (!vehicle) return { status: "ok", data: null, error: "Vehicle not found." };
 
           console.log("vehicle: ", vehicle);
