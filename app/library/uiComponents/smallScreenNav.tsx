@@ -24,7 +24,7 @@ export default function SmallScreenNav(): JSX.Element {
                                    <Image
                                         src={logo}
                                         alt={"Kulkupeli-logo"}
-                                        className="h-14 w-auto"
+                                        className="h-10 w-auto"
                                    />
                               </Link>
                               {status === "unauthenticated" ? (

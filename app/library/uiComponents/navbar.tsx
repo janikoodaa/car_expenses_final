@@ -16,7 +16,7 @@ export default async function Navbar(): Promise<JSX.Element> {
           <nav className="min-h-full flex-row justify-between bg-slate-600 pl-4 pr-4 text-slate-100 ">
                {/** For larger screens */}
                <ul className="hidden h-14 list-none flex-row gap-3 lg:flex">
-                    <li className="flex h-full items-center">
+                    <li className="flex items-center">
                          <Link
                               href={"/"}
                               className="text-xl font-bold"
@@ -24,7 +24,7 @@ export default async function Navbar(): Promise<JSX.Element> {
                               <Image
                                    src={logo}
                                    alt={"Kulkupeli-logo"}
-                                   className="w-24"
+                                   className="h-10 w-auto"
                               />
                          </Link>
                     </li>
