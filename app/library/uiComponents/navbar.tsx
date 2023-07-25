@@ -1,10 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../configuration/authOptions";
 import SignOutButton from "./signOutButton";
 import SignInButton from "./signInButton";
 import SmallScreenNav from "./smallScreenNav";
 import protectedLinks from "@/linksForSignedInUsers.json";
+import logo from "@/public/images/kulkupeli_logo.png";
 
 export default async function Navbar(): Promise<JSX.Element> {
      let session = await getServerSession(authOptions);
@@ -19,7 +21,11 @@ export default async function Navbar(): Promise<JSX.Element> {
                               href={"/"}
                               className="text-xl font-bold"
                          >
-                              Kul<span className="text-green-400">k</span>upeli
+                              <Image
+                                   src={logo}
+                                   alt={"Kulkupeli-logo"}
+                                   className="w-24"
+                              />
                          </Link>
                     </li>
                     {!session

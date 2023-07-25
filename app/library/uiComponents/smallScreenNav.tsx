@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoMdClose } from "react-icons/io";
 import Link from "next/link";
+import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
 import protectedLinks from "@/linksForSignedInUsers.json";
 import SignInButton from "./signInButton";
+import logo from "@/public/images/kulkupeli_logo.png";
 
 export default function SmallScreenNav(): JSX.Element {
      const [showBurgerMenu, setShowBurgerMenu] = useState<boolean>(false);
@@ -14,18 +16,22 @@ export default function SmallScreenNav(): JSX.Element {
           <>
                <ul className="flex h-full w-full list-none flex-col gap-3 bg-slate-600 text-slate-100 lg:hidden">
                     <li className="flex h-14 items-center">
-                         <div className="flex w-full flex-row justify-between">
+                         <div className="flex w-full flex-row items-center justify-between">
                               <Link
                                    href={"/"}
-                                   className="flex text-xl font-bold"
+                                   className="flex"
                               >
-                                   Kul<span className="text-green-400">k</span>upeli
+                                   <Image
+                                        src={logo}
+                                        alt={"Kulkupeli-logo"}
+                                        className="h-14 w-auto"
+                                   />
                               </Link>
                               {status === "unauthenticated" ? (
                                    <SignInButton />
                               ) : (
                                    <button
-                                        className="ml-auto flex rounded-md border-2 border-solid border-slate-100 p-1"
+                                        className="ml-auto flex h-7 rounded-md border-2 border-solid border-slate-100 p-1"
                                         onClick={() => setShowBurgerMenu((prev) => !prev)}
                                         disabled={status === "loading"}
                                    >
