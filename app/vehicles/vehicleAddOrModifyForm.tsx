@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import DatePicker from "../library/uiComponents/datePickerComponent";
 import Button from "../library/uiComponents/buttonComponent";
 import Image from "next/image";
-import { IVehicle } from "../library/models/Vehicle";
+import { IVehicle, VehicleWithTypes } from "../library/models/Vehicle";
 import { ChangeEvent, useEffect, useState } from "react";
 import Switch from "../library/uiComponents/switchComponent";
 import { VehicleType } from "../library/models/VehicleType";
@@ -26,10 +26,10 @@ interface IVehicleFormProps {
 const emptyVehicle: IVehicleForm = {
      make: "",
      model: "",
-     type: undefined,
+     typeId: undefined,
      nickName: "",
      inUseFromString: "",
-     primaryFuel: undefined,
+     primaryFuelId: undefined,
      registeringDateString: "",
      year: 0,
      registerNumberPlain: "",
@@ -39,7 +39,7 @@ const emptyVehicle: IVehicleForm = {
 };
 
 export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVehicleFormProps): JSX.Element {
-     const v: IVehicle | null = vehicle
+     const v: VehicleWithTypes | null = vehicle
           ? JSON.parse(vehicle, (key, value) => {
                  //   console.log(`revive key: ${key} typeof key: ${typeof key} & value: ${value} typeof value ${typeof value}`);
                  //   if (key === ("registeringDate" || "inUseFrom" || "inUseTo") && value !== "") return new Date(value);
@@ -55,6 +55,8 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                  ...v,
                  inUseFromString: DateTime.fromJSDate(v.inUseFrom).toISODate(),
                  registeringDateString: v.registeringDate ? DateTime.fromJSDate(v.registeringDate).toISODate() : "",
+                 typeId: v.typeId._id,
+                 primaryFuelId: v.primaryFuelId?._id,
             } as Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner">)
           : null;
      const [loading, setLoading] = useState<boolean>(false);
@@ -72,10 +74,10 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                try {
                     const res = await fetch("/api/vehicle/type", { method: "GET", signal: signal });
                     const json: IDataResponse<VehicleType[]> = await res.json();
-                    console.log("vehicleTypes json: ", json);
+                    // console.log("vehicleTypes json: ", json);
                     if (json.data) {
                          json.data.map((type) => {
-                              setVehicleTypes((prev) => [...prev, { value: type.type, description: type.typeDescription }]);
+                              setVehicleTypes((prev) => [...prev, { value: type._id?.toString(), description: type.typeDescription }]);
                          });
                     }
                } catch (error) {
@@ -86,7 +88,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                try {
                     const res = await fetch("/api/vehicle/fuel", { method: "GET", signal: signal });
                     const json: IDataResponse<VehicleType[]> = await res.json();
-                    console.log("fuelTypes json: ", json);
+                    // console.log("fuelTypes json: ", json);
                     if (json.data) {
                          json.data.map((type) => {
                               setFuelTypes((prev) => [...prev, { value: type._id?.toString(), description: type.typeDescription }]);
@@ -138,7 +140,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
           setLoading(true);
           if (purpose === "add") {
                console.log("New vehicle form data: ", formData);
-               if (formData.type !== undefined && formData.primaryFuel !== undefined) {
+               if (formData.typeId !== undefined) {
                     const res = await fetch(endpoint, {
                          method: "POST",
                          body: JSON.stringify(formData),
@@ -170,16 +172,17 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                }
           }
      };
+
      return (
           <form
                className="mx-8 flex flex-col gap-2"
                onSubmit={handleSubmit}
           >
                <Select
-                    name="type"
+                    name="typeId"
                     label="Tyyppi"
                     options={vehicleTypes}
-                    value={formData.type?._id?.toString()}
+                    value={formData.typeId?.toString()}
                     onChange={handleSelectChange}
                />
                <Input
@@ -232,10 +235,10 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                     onChange={handleInputChange}
                />
                <Select
-                    name="primaryFuel"
+                    name="primaryFuelId"
                     label="Polttoaine"
                     options={fuelTypes}
-                    value={formData.primaryFuel?._id?.toString()}
+                    value={formData.primaryFuelId?.toString()}
                     onChange={handleSelectChange}
                />
                <DatePicker

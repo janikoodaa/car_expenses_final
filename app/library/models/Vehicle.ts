@@ -7,7 +7,7 @@ import VehicleTypeModel, { VehicleType } from "./VehicleType";
 
 export interface IVehicle {
      _id?: Types.ObjectId;
-     type: VehicleType | undefined;
+     typeId: Types.ObjectId | undefined;
      make: string;
      model: string;
      nickName: string | undefined;
@@ -17,28 +17,29 @@ export interface IVehicle {
      registerNumberPlain: string | undefined;
      inUseFrom: Date;
      inUseTo: Date | null;
-     primaryFuel: FuelType | undefined;
+     primaryFuelId: Types.ObjectId | undefined;
      active: boolean;
      ownerId: string;
      coUserIds: string[];
      imageUrl: string | null;
 }
 
-export interface VehicleWithUsers extends IVehicle {
+export interface VehicleWithTypes extends Omit<IVehicle, "typeId" | "primaryFuelId"> {
+     typeId: VehicleType;
+     primaryFuelId: FuelType | null;
+}
+
+export interface VehicleWithUsers extends VehicleWithTypes {
      owner: IAppUser;
      coUsers: IAppUser[];
 }
 
 const vehicleSchema = new Schema<IVehicle>(
      {
-          type: {
+          typeId: {
                type: Schema.Types.ObjectId,
                ref: VehicleTypeModel,
           },
-          // type: {
-          //      type: String,
-          //      required: true,
-          // },
           make: {
                type: String,
                required: true,
@@ -76,7 +77,7 @@ const vehicleSchema = new Schema<IVehicle>(
                min: new Date("1950-01-01"),
                default: null,
           },
-          primaryFuel: {
+          primaryFuelId: {
                type: Schema.Types.ObjectId,
                ref: FuelTypeModel,
           },

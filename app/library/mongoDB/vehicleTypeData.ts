@@ -13,7 +13,7 @@ export const getActiveVehicleTypes = cache(async (): Promise<IDataResponse<Vehic
      console.log(`${startTime}, getActiveVehicleTypes()`);
      try {
           await dbConnect();
-          const vehicleTypes: VehicleType[] = await VehicleTypeModel.find({ active: true }, { _id: 0, type: 1, typeDescription: 1 }).sort({
+          const vehicleTypes: VehicleType[] = await VehicleTypeModel.find({ active: true }).sort({
                typeDescription: 1,
           });
           console.log(`${DateTime.now().toISO()}, returning from getActiveVehicleTypes(), startTime: ${startTime} - success`);
