@@ -4,7 +4,7 @@ import { authOptions } from "@/app/configuration/authOptions";
 import { insertNewVehicle, updateVehicle } from "@/app/library/mongoDB/vehicleData";
 import IDataResponse from "@/types/dataResponse";
 import { IVehicle } from "@/app/library/models/Vehicle";
-import { encryptString } from "@/app/library/mongoDB/encryptData";
+import { encryptString } from "@/app/library/mongoDB/stringEncryption";
 import { IVehicleForm } from "@/app/vehicles/vehicleAddOrModifyForm";
 
 export async function POST(request: NextRequest): Promise<Response> {

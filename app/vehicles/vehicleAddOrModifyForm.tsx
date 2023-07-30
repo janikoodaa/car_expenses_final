@@ -1,13 +1,15 @@
 "use client";
-import Select from "../library/uiComponents/selectComponent";
+import Select, { ISelectOption } from "../library/uiComponents/selectComponent";
 import Input from "../library/uiComponents/inputComponent";
 import { DateTime } from "luxon";
 import DatePicker from "../library/uiComponents/datePickerComponent";
 import Button from "../library/uiComponents/buttonComponent";
 import Image from "next/image";
-import { IVehicle } from "../library/models/Vehicle";
-import { ChangeEvent, useState } from "react";
+import { IVehicle, VehicleWithTypes } from "../library/models/Vehicle";
+import { ChangeEvent, useEffect, useState } from "react";
 import Switch from "../library/uiComponents/switchComponent";
+import { VehicleType } from "../library/models/VehicleType";
+import IDataResponse from "@/types/dataResponse";
 
 export interface IVehicleForm
      extends Omit<IVehicle, "ownerId" | "inUseFrom" | "registeringDate" | "inUseTo" | "inUseToString" | "owner" | "registerNumber"> {
@@ -24,10 +26,10 @@ interface IVehicleFormProps {
 const emptyVehicle: IVehicleForm = {
      make: "",
      model: "",
-     type: undefined,
+     typeId: undefined,
      nickName: "",
      inUseFromString: "",
-     primaryFuel: undefined,
+     primaryFuelId: undefined,
      registeringDateString: "",
      year: 0,
      registerNumberPlain: "",
@@ -36,21 +38,8 @@ const emptyVehicle: IVehicleForm = {
      coUserIds: [],
 };
 
-/// todo: nämä vietävä kantaan
-const vehicleTypes = [
-     { value: undefined, description: "Ei valittu" },
-     { value: "car", description: "henkilöauto" },
-     { value: "bicycle", description: "polkupyörä" },
-];
-const fuelTypes = [
-     { value: undefined, description: "Ei valittu" },
-     { value: "95E10", description: "95E10" },
-     { value: "98E5", description: "98E5" },
-     { value: "Diesel", description: "Diesel" },
-];
-
 export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVehicleFormProps): JSX.Element {
-     const v: IVehicle | null = vehicle
+     const v: VehicleWithTypes | null = vehicle
           ? JSON.parse(vehicle, (key, value) => {
                  //   console.log(`revive key: ${key} typeof key: ${typeof key} & value: ${value} typeof value ${typeof value}`);
                  //   if (key === ("registeringDate" || "inUseFrom" || "inUseTo") && value !== "") return new Date(value);
@@ -66,12 +55,57 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                  ...v,
                  inUseFromString: DateTime.fromJSDate(v.inUseFrom).toISODate(),
                  registeringDateString: v.registeringDate ? DateTime.fromJSDate(v.registeringDate).toISODate() : "",
+                 typeId: v.typeId._id,
+                 primaryFuelId: v.primaryFuelId?._id,
             } as Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner">)
           : null;
      const [loading, setLoading] = useState<boolean>(false);
      const [formData, setFormData] = useState<Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner">>(
           vehicleToModify ?? emptyVehicle
      );
+     const [vehicleTypes, setVehicleTypes] = useState<ISelectOption[]>([{ value: undefined, description: "Ei valittu" }]);
+     const [fuelTypes, setFuelTypes] = useState<ISelectOption[]>([{ value: undefined, description: "Ei valittu" }]);
+
+     useEffect(() => {
+          const controller = new AbortController();
+          const signal = controller.signal;
+
+          const getVehicleTypes = async () => {
+               try {
+                    const res = await fetch("/api/vehicle/type", { method: "GET", signal: signal });
+                    const json: IDataResponse<VehicleType[]> = await res.json();
+                    // console.log("vehicleTypes json: ", json);
+                    if (json.data) {
+                         json.data.map((type) => {
+                              setVehicleTypes((prev) => [...prev, { value: type._id?.toString(), description: type.typeDescription }]);
+                         });
+                    }
+               } catch (error) {
+                    console.log("Virhe ajoneuvotyyppejä haettaessa: ", error);
+               }
+          };
+          const getFuelTypes = async () => {
+               try {
+                    const res = await fetch("/api/vehicle/fuel", { method: "GET", signal: signal });
+                    const json: IDataResponse<VehicleType[]> = await res.json();
+                    // console.log("fuelTypes json: ", json);
+                    if (json.data) {
+                         json.data.map((type) => {
+                              setFuelTypes((prev) => [...prev, { value: type._id?.toString(), description: type.typeDescription }]);
+                         });
+                    }
+               } catch (error) {
+                    console.log("Virhe polttoainetyyppejä haettaessa: ", error);
+               }
+          };
+
+          getVehicleTypes();
+          getFuelTypes();
+
+          return () => {
+               controller.abort();
+          };
+     }, []);
 
      const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
           // console.log(`handleFormChange e.target.name: ${e.target.name} and e.target.value: ${e.target.value}`);
@@ -106,7 +140,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
           setLoading(true);
           if (purpose === "add") {
                console.log("New vehicle form data: ", formData);
-               if (formData.type !== undefined && formData.primaryFuel !== undefined) {
+               if (formData.typeId !== undefined) {
                     const res = await fetch(endpoint, {
                          method: "POST",
                          body: JSON.stringify(formData),
@@ -138,16 +172,17 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                }
           }
      };
+
      return (
           <form
                className="mx-8 flex flex-col gap-2"
                onSubmit={handleSubmit}
           >
                <Select
-                    name="type"
+                    name="typeId"
                     label="Tyyppi"
                     options={vehicleTypes}
-                    value={formData.type}
+                    value={formData.typeId?.toString()}
                     onChange={handleSelectChange}
                />
                <Input
@@ -200,10 +235,10 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                     onChange={handleInputChange}
                />
                <Select
-                    name="primaryFuel"
+                    name="primaryFuelId"
                     label="Polttoaine"
                     options={fuelTypes}
-                    value={formData.primaryFuel}
+                    value={formData.primaryFuelId?.toString()}
                     onChange={handleSelectChange}
                />
                <DatePicker

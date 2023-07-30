@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../configuration/authOptions";
 import { getOwnedVehiclesForUser, getGrantedVehiclesForUser } from "../library/mongoDB/vehicleData";
 import IDataResponse from "@/types/dataResponse";
-import { IVehicle } from "../library/models/Vehicle";
+import { VehicleWithTypes } from "../library/models/Vehicle";
 
 export const metadata = {
      title: "Kul(k)upeli - minä",
@@ -15,11 +15,11 @@ export default async function User(): Promise<JSX.Element> {
      // Check that there's valid session before further actions
      if (!session) return <div>Forbidden</div>;
 
-     const ownedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getOwnedVehiclesForUser(session.user.aadObjectId!);
-     const privilegedVehiclesPromise: Promise<IDataResponse<IVehicle[]>> = getGrantedVehiclesForUser(session.user.aadObjectId!);
-     const resolvedPromises: IDataResponse<IVehicle[]>[] = await Promise.all([ownedVehiclesPromise, privilegedVehiclesPromise]);
-     const ownedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[0];
-     const privilegedVehicles: IDataResponse<IVehicle[]> = resolvedPromises[1];
+     const ownedVehiclesPromise: Promise<IDataResponse<VehicleWithTypes[]>> = getOwnedVehiclesForUser(session.user.aadObjectId!);
+     const privilegedVehiclesPromise: Promise<IDataResponse<VehicleWithTypes[]>> = getGrantedVehiclesForUser(session.user.aadObjectId!);
+     const resolvedPromises: IDataResponse<VehicleWithTypes[]>[] = await Promise.all([ownedVehiclesPromise, privilegedVehiclesPromise]);
+     const ownedVehicles: IDataResponse<VehicleWithTypes[]> = resolvedPromises[0];
+     const privilegedVehicles: IDataResponse<VehicleWithTypes[]> = resolvedPromises[1];
 
      return (
           <div className="mt-4 flex w-full columns-1 flex-col items-center gap-4 pb-10">
@@ -37,7 +37,7 @@ export default async function User(): Promise<JSX.Element> {
      );
 }
 
-function OwnedVehiclesList({ vehicles }: { vehicles: IVehicle[] | null }): JSX.Element | null {
+function OwnedVehiclesList({ vehicles }: { vehicles: VehicleWithTypes[] | null }): JSX.Element | null {
      if (vehicles === null || !vehicles.length) return null;
      const ownedVehiclesList = vehicles.map((v) => {
           return (
@@ -55,7 +55,7 @@ function OwnedVehiclesList({ vehicles }: { vehicles: IVehicle[] | null }): JSX.E
      );
 }
 
-function PrivilegedVehiclesList({ vehicles }: { vehicles: IVehicle[] | null }): JSX.Element | null {
+function PrivilegedVehiclesList({ vehicles }: { vehicles: VehicleWithTypes[] | null }): JSX.Element | null {
      if (vehicles === null || !vehicles.length) return null;
      const privilegedVehiclesList = vehicles.map((v) => {
           return (

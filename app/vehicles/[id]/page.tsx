@@ -8,6 +8,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { DateTime } from "luxon";
 import ModifyVehicle from "./modifyButton";
 import { Metadata } from "next";
+import selectPlaceholderImage from "@/app/library/utils/selectPlaceholderImage";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
      const session = await getServerSession(authOptions);
@@ -85,7 +86,7 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                               ) : null}
                               <tr className="h-9 border-b border-b-gray-400">
                                    <th className="w-1/2 px-2 text-right">Polttoaine</th>
-                                   <td className="w-1/2 px-2 text-center">{vehicle.primaryFuel}</td>
+                                   <td className="w-1/2 px-2 text-center">{vehicle.primaryFuelId?.typeDescription}</td>
                               </tr>
                               {vehicle.registerNumber ? (
                                    <tr className="h-9 border-b border-b-gray-400">
@@ -116,7 +117,15 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                               className="order-1 col-span-1 rounded-md lg:order-2"
                          />
                     ) : (
-                         <div className="order-1 mx-4 hidden h-full items-center text-slate-400 lg:order-2 lg:flex">Ei kuvaa</div>
+                         <Image
+                              src={selectPlaceholderImage(vehicle.typeId.type)}
+                              alt={`${vehicle.make} ${vehicle.model}`}
+                              width={600}
+                              height={400}
+                              style={{ maxHeight: "80%", width: "auto" }}
+                              priority
+                              className="order-1"
+                         />
                     )}
                </div>
                <div className="grid w-full grid-cols-1 p-2">

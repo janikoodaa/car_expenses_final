@@ -4,7 +4,6 @@ import Button from "@/app/library/uiComponents/buttonComponent";
 import Modal from "@/app/library/uiComponents/modalComponent";
 import { useState } from "react";
 import AddOrModifyVechile from "../vehicleAddOrModifyForm";
-import { IVehicle } from "@/app/library/models/Vehicle";
 
 export default function ModifyVehicle({ vehicle }: { vehicle: string }) {
      const [modalOpen, setModalState] = useState<boolean>(false);

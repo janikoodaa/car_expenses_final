@@ -2,7 +2,7 @@
 
 import { SelectHTMLAttributes } from "react";
 
-interface ISelectOption {
+export interface ISelectOption {
      value: number | string | undefined;
      description: string;
 }
