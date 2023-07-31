@@ -1,12 +1,10 @@
-import Vehicle, { IVehicle, VehicleWithTypes, VehicleWithUsers } from "../models/Vehicle";
+import VehicleModel, { IVehicle, VehicleWithTypes, VehicleWithUsers } from "../models/Vehicle";
 import IDataResponse from "@/types/dataResponse";
 import dbConnect from "../database/dbConnect";
 import { HydratedDocument } from "mongoose";
 import { DateTime } from "luxon";
 import { getUserFromGraphById } from "../msGraph/getUserFromGraph";
 import { cache } from "react";
-import FuelTypeModel from "../models/FuelType";
-import { ObjectId } from "mongodb";
 
 /**
  * Get vehicles the user owns at the moment
@@ -18,7 +16,7 @@ export const getOwnedVehiclesForUser = cache(async (userId: string): Promise<IDa
      console.log(`${startTime}, getOwnedVehiclesForUser() with userId=${userId}`);
      try {
           await dbConnect();
-          const vehicles: VehicleWithTypes[] = await Vehicle.find({ ownerId: userId, active: true })
+          const vehicles: VehicleWithTypes[] = await VehicleModel.find({ ownerId: userId, active: true })
                .sort({ inUseFrom: -1 })
                .populate(["typeId", "primaryFuelId"]);
           console.log(`${DateTime.now().toISO()}, returning from getOwnedVehiclesForUser(), startTime: ${startTime} - success`);
@@ -39,7 +37,7 @@ export const getGrantedVehiclesForUser = cache(async (userId: string): Promise<I
      console.log(`${startTime}, getGrantedVehiclesForUser() with userId=${userId}`);
      try {
           await dbConnect();
-          const vehicles: VehicleWithTypes[] = await Vehicle.find({ coUserIds: userId, active: true })
+          const vehicles: VehicleWithTypes[] = await VehicleModel.find({ coUserIds: userId, active: true })
                .sort({
                     inUseFrom: -1,
                })
@@ -62,7 +60,7 @@ export const getRetiredVehiclesForUser = cache(async (userId: string): Promise<I
      console.log(`${startTime}, getRetiredVehiclesForUser() with userId=${userId}`);
      try {
           await dbConnect();
-          const vehicles: VehicleWithTypes[] = await Vehicle.find({
+          const vehicles: VehicleWithTypes[] = await VehicleModel.find({
                active: false,
                $or: [{ ownerId: userId }, { coUserIds: userId }],
           })
@@ -88,7 +86,7 @@ export const getVehicleById = cache(async (vehicleId: string, userId: string): P
      try {
           await dbConnect();
           const vehicle: VehicleWithTypes = (
-               await Vehicle.findOne({
+               await VehicleModel.findOne({
                     $or: [{ ownerId: userId }, { coUserIds: userId }],
                     _id: vehicleId,
                }).populate(["typeId", "primaryFuelId"])
@@ -134,7 +132,7 @@ export async function insertNewVehicle(vehicle: IVehicle): Promise<IDataResponse
      console.log(`${startTime}, insertNewVehicle() with vehicle=${JSON.stringify(vehicle)}`);
      try {
           await dbConnect();
-          const result = await new Vehicle(vehicle).save();
+          const result = await new VehicleModel(vehicle).save();
           console.log(`${DateTime.now().toISO()}, returning from insertNewVehicle(), startTime: ${startTime} - success`);
           return { status: "ok", data: result };
      } catch (error: any) {
@@ -153,7 +151,7 @@ export async function updateVehicle(vehicle: IVehicle): Promise<IDataResponse<IV
      console.log(`${startTime}, updateVehicle() with vehicle=${JSON.stringify(vehicle)}`);
      try {
           await dbConnect();
-          const vehicleInDb: HydratedDocument<IVehicle> | null = await Vehicle.findOne({
+          const vehicleInDb: HydratedDocument<IVehicle> | null = await VehicleModel.findOne({
                ownerId: vehicle.ownerId,
                _id: vehicle._id,
           });
@@ -170,7 +168,6 @@ export async function updateVehicle(vehicle: IVehicle): Promise<IDataResponse<IV
           vehicleInDb.registeringDate = vehicle.registeringDate;
           vehicleInDb.registerNumber = vehicle.registerNumber;
           vehicleInDb.inUseFrom = vehicle.inUseFrom;
-          // vehicleInDb.inUseTo = vehicle.inUseTo;
           vehicleInDb.primaryFuelId = vehicle.primaryFuelId;
           if (vehicleInDb.active !== vehicle.active) {
                vehicleInDb.inUseTo = vehicle.active ? null : DateTime.utc().toJSDate();

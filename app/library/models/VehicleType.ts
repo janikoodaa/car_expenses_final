@@ -29,6 +29,6 @@ const vehicleTypeSchema = new Schema<VehicleType>(
      }
 );
 
-const VehicleTypeModel = models.VehicleTypeModel || model<VehicleType>("VehicleTypeModel", vehicleTypeSchema);
+const VehicleTypeModel = models.VehicleType || model<VehicleType>("VehicleType", vehicleTypeSchema);
 
 export default VehicleTypeModel;

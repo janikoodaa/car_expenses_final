@@ -29,6 +29,6 @@ const fuelTypeSchema = new Schema<FuelType>(
      }
 );
 
-const FuelTypeModel = models.FuelTypeModel || model<FuelType>("FuelTypeModel", fuelTypeSchema);
+const FuelTypeModel = models.FuelType || model<FuelType>("FuelType", fuelTypeSchema);
 
 export default FuelTypeModel;
