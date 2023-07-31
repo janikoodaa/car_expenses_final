@@ -128,6 +128,6 @@ vehicleSchema.pre("validate", function (next) {
      next();
 });
 
-const Vehicle = models.Vehicle || model<IVehicle>("Vehicle", vehicleSchema);
+const VehicleModel = models.Vehicle || model<IVehicle>("Vehicle", vehicleSchema);
 
-export default Vehicle;
+export default VehicleModel;
