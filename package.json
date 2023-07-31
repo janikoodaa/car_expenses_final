@@ -18,7 +18,7 @@
     "eslint-config-next": "^13.4.4",
     "luxon": "^3.3.0",
     "mongodb": "^5.6.0",
-    "mongoose": "^7.3.2",
+    "mongoose": "^7.4.1",
     "mssql": "^9.1.1",
     "next": "^13.4.9",
     "next-auth": "^4.22.1",
@@ -26,6 +26,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.8.0",
+    "server-only": "^0.0.1",
     "tailwindcss": "3.3.2",
     "typescript": "^5.1.3"
   },
