@@ -14,7 +14,7 @@ export default function DatePicker({ label, dateValue, ...defaultProps }: IInput
           <div className="flex flex-col">
                <label
                     htmlFor={defaultProps.name}
-                    className="px-2 py-1 text-sm"
+                    className="pl-2 text-sm"
                >
                     {label}
                </label>
@@ -22,7 +22,7 @@ export default function DatePicker({ label, dateValue, ...defaultProps }: IInput
                     {...defaultProps}
                     id={defaultProps.name}
                     type="date"
-                    className="rounded-md pl-2 text-lg"
+                    className="h-9 rounded-md px-2 py-1 text-lg"
                     value={dateValue}
                />
           </div>

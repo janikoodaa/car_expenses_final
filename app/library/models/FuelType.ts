@@ -2,14 +2,14 @@ import { Schema, Types, model, models } from "mongoose";
 
 export interface FuelType {
      _id?: Types.ObjectId;
-     type: string;
+     typeDef: string;
      active?: boolean;
      typeDescription: string;
 }
 
 const fuelTypeSchema = new Schema<FuelType>(
      {
-          type: {
+          typeDef: {
                type: String,
                required: true,
           },

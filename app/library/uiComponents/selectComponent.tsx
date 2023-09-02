@@ -24,7 +24,7 @@ export default function Select({ label, options, ...defaultProps }: ISelectProps
                <select
                     {...defaultProps}
                     id={defaultProps.name}
-                    className="rounded-md px-2 py-1 text-lg"
+                    className="h-9 rounded-md px-2 py-1 text-lg"
                >
                     {options.map((opt) => {
                          return (

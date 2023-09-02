@@ -2,13 +2,13 @@ import { Schema, Types, model, models } from "mongoose";
 
 export interface EventType {
      _id?: Types.ObjectId;
-     type: string;
+     typeDef: string;
      typeDescription: string;
 }
 
 const eventTypeSchema = new Schema<EventType>(
      {
-          type: {
+          typeDef: {
                type: String,
                required: true,
           },

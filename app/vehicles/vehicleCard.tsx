@@ -39,7 +39,7 @@ export async function VehicleCard({ vehicle }: { vehicle: VehicleWithTypes }): P
                               />
                          ) : (
                               <Image
-                                   src={selectPlaceholderImage(vehicle.typeId.type)}
+                                   src={selectPlaceholderImage(vehicle.type.typeDef)}
                                    alt={`${vehicle.make} ${vehicle.model}`}
                                    width={500}
                                    height={500}

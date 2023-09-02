@@ -7,7 +7,8 @@ import VehicleTypeModel, { VehicleType } from "./VehicleType";
 
 export interface IVehicle {
      _id?: Types.ObjectId;
-     typeId: Types.ObjectId | undefined;
+     // typeId: Types.ObjectId | undefined;
+     type: Pick<VehicleType, "typeDef" | "typeDescription">;
      make: string;
      model: string;
      nickName: string | undefined;
@@ -17,7 +18,8 @@ export interface IVehicle {
      registerNumberPlain: string | undefined;
      inUseFrom: Date;
      inUseTo: Date | null;
-     primaryFuelId: Types.ObjectId | undefined;
+     // primaryFuelId: Types.ObjectId | undefined;
+     primaryFuel: Pick<FuelType, "typeDef" | "typeDescription">;
      active: boolean;
      ownerId: string;
      coUserIds: string[];
@@ -36,9 +38,19 @@ export interface VehicleWithUsers extends VehicleWithTypes {
 
 const vehicleSchema = new Schema<IVehicle>(
      {
-          typeId: {
-               type: Schema.Types.ObjectId,
-               ref: VehicleTypeModel,
+          // typeId: {
+          //      type: Schema.Types.ObjectId,
+          //      ref: VehicleTypeModel,
+          // },
+          type: {
+               typeDef: {
+                    type: String,
+                    required: true,
+               },
+               typeDescription: {
+                    type: String,
+                    required: true,
+               },
           },
           make: {
                type: String,
@@ -77,9 +89,19 @@ const vehicleSchema = new Schema<IVehicle>(
                min: new Date("1950-01-01"),
                default: null,
           },
-          primaryFuelId: {
-               type: Schema.Types.ObjectId,
-               ref: FuelTypeModel,
+          // primaryFuelId: {
+          //      type: Schema.Types.ObjectId,
+          //      ref: FuelTypeModel,
+          // },
+          primaryFuel: {
+               typeDef: {
+                    type: String,
+                    required: true,
+               },
+               typeDescription: {
+                    type: String,
+                    required: true,
+               },
           },
           active: {
                type: Boolean,
