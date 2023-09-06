@@ -86,7 +86,7 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                               ) : null}
                               <tr className="h-9 border-b border-b-gray-400">
                                    <th className="w-1/2 px-2 text-right">Polttoaine</th>
-                                   <td className="w-1/2 px-2 text-center">{vehicle.primaryFuelId?.typeDescription}</td>
+                                   <td className="w-1/2 px-2 text-center">{vehicle.primaryFuel?.typeDescription}</td>
                               </tr>
                               {vehicle.registerNumber ? (
                                    <tr className="h-9 border-b border-b-gray-400">
@@ -118,7 +118,7 @@ export default async function SingleVehiclePage({ params }: { params: { id: stri
                          />
                     ) : (
                          <Image
-                              src={selectPlaceholderImage(vehicle.typeId.type)}
+                              src={selectPlaceholderImage(vehicle.type.typeDef)}
                               alt={`${vehicle.make} ${vehicle.model}`}
                               width={600}
                               height={400}

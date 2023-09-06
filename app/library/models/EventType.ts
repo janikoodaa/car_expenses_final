@@ -1,22 +1,16 @@
 import { Schema, Types, model, models } from "mongoose";
 
-export interface FuelType {
+export interface EventType {
      _id?: Types.ObjectId;
      typeDef: string;
-     active?: boolean;
      typeDescription: string;
 }
 
-const fuelTypeSchema = new Schema<FuelType>(
+const eventTypeSchema = new Schema<EventType>(
      {
           typeDef: {
                type: String,
                required: true,
-          },
-          active: {
-               type: Boolean,
-               required: true,
-               default: true,
           },
           typeDescription: {
                type: String,
@@ -24,11 +18,11 @@ const fuelTypeSchema = new Schema<FuelType>(
           },
      },
      {
-          collection: "fuelTypes",
+          collection: "eventTypes",
           timestamps: true,
      }
 );
 
-const FuelTypeModel = models.FuelType || model<FuelType>("FuelType", fuelTypeSchema);
+const EventTypeModel = models.EventType || model<EventType>("EventType", eventTypeSchema);
 
-export default FuelTypeModel;
+export default EventTypeModel;

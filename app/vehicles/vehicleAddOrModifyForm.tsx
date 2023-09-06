@@ -26,10 +26,12 @@ interface IVehicleFormProps {
 const emptyVehicle: IVehicleForm = {
      make: "",
      model: "",
-     typeId: undefined,
+     // typeId: undefined,
+     type: { typeDef: "", typeDescription: "" },
      nickName: "",
      inUseFromString: "",
-     primaryFuelId: undefined,
+     // primaryFuelId: undefined,
+     primaryFuel: { typeDef: "", typeDescription: "" },
      registeringDateString: "",
      year: 0,
      registerNumberPlain: "",
@@ -43,7 +45,9 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
           ? JSON.parse(vehicle, (key, value) => {
                  //   console.log(`revive key: ${key} typeof key: ${typeof key} & value: ${value} typeof value ${typeof value}`);
                  //   if (key === ("registeringDate" || "inUseFrom" || "inUseTo") && value !== "") return new Date(value);
-                 if (key === "registeringDate" && value !== "") return new Date(value);
+                 if (key === "registeringDate" && value) return new Date(value);
+                 if (key === "registeringDate" && !value) return null;
+                 //   if (key === "registeringDate" && value !== "") return new Date(value);
                  if (key === "inUseFrom" && value !== "") return new Date(value);
                  if (key === "inUseTo" && value !== "") return new Date(value);
                  return value;
@@ -55,11 +59,13 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                  ...v,
                  inUseFromString: DateTime.fromJSDate(v.inUseFrom).toISODate(),
                  registeringDateString: v.registeringDate ? DateTime.fromJSDate(v.registeringDate).toISODate() : "",
-                 typeId: v.typeId._id,
-                 primaryFuelId: v.primaryFuelId?._id,
+                 //   typeId: v.typeId._id,
+                 type: v.type || { typeDef: "", typeDescription: "" },
+                 //   primaryFuelId: v.primaryFuelId?._id,
+                 primaryFuel: v.primaryFuel || { typeDef: "", typeDescription: "" },
             } as Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner">)
           : null;
-     const [loading, setLoading] = useState<boolean>(false);
+     const [isLoading, setIsLoading] = useState<boolean>(false);
      const [formData, setFormData] = useState<Omit<IVehicleForm, "inUseFrom" | "registeringDate" | "inUseTo" | "owner">>(
           vehicleToModify ?? emptyVehicle
      );
@@ -67,6 +73,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
      const [fuelTypes, setFuelTypes] = useState<ISelectOption[]>([{ value: undefined, description: "Ei valittu" }]);
 
      useEffect(() => {
+          setIsLoading(true);
           const controller = new AbortController();
           const signal = controller.signal;
 
@@ -77,7 +84,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                     // console.log("vehicleTypes json: ", json);
                     if (json.data) {
                          json.data.map((type) => {
-                              setVehicleTypes((prev) => [...prev, { value: type._id?.toString(), description: type.typeDescription }]);
+                              setVehicleTypes((prev) => [...prev, { value: type.typeDef, description: type.typeDescription }]);
                          });
                     }
                } catch (error) {
@@ -91,7 +98,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                     // console.log("fuelTypes json: ", json);
                     if (json.data) {
                          json.data.map((type) => {
-                              setFuelTypes((prev) => [...prev, { value: type._id?.toString(), description: type.typeDescription }]);
+                              setFuelTypes((prev) => [...prev, { value: type.typeDef, description: type.typeDescription }]);
                          });
                     }
                } catch (error) {
@@ -101,6 +108,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
 
           getVehicleTypes();
           getFuelTypes();
+          setIsLoading(false);
 
           return () => {
                controller.abort();
@@ -108,8 +116,20 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
      }, []);
 
      const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-          // console.log(`handleFormChange e.target.name: ${e.target.name} and e.target.value: ${e.target.value}`);
-          setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+          console.log(`handleFormChange e.target.name: ${e.target.name} and e.target.value: ${e.target.value}`);
+          if (e.target.name === "vehicleType") {
+               setFormData((prev) => ({
+                    ...prev,
+                    type: { typeDef: e.target.value, typeDescription: "" },
+               }));
+          } else if (e.target.name === "primaryFuelType") {
+               setFormData((prev) => ({
+                    ...prev,
+                    primaryFuel: { typeDef: e.target.value, typeDescription: "" },
+               }));
+          } else {
+               setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+          }
      };
 
      const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -137,10 +157,10 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
      const handleSubmit = async (e: any) => {
           e.preventDefault();
           const endpoint: string = "/api/vehicle";
-          setLoading(true);
+          setIsLoading(true);
           if (purpose === "add") {
                console.log("New vehicle form data: ", formData);
-               if (formData.typeId !== undefined) {
+               if (formData.type.typeDef !== undefined) {
                     const res = await fetch(endpoint, {
                          method: "POST",
                          body: JSON.stringify(formData),
@@ -149,7 +169,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                     //    console.log("Submit res: ", res);
                     const json = await res.json();
                     console.log("Submit json: ", json);
-                    setLoading(false);
+                    setIsLoading(false);
                     if (json.status === "ok") {
                          window.scrollTo({ top: 0 });
                          window.location.reload();
@@ -165,7 +185,7 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                });
                const json = await res.json();
                console.log("Submit json: ", json);
-               setLoading(false);
+               setIsLoading(false);
                if (json.status === "ok") {
                     window.scrollTo({ top: 0 });
                     window.location.reload();
@@ -179,10 +199,11 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                onSubmit={handleSubmit}
           >
                <Select
-                    name="typeId"
+                    name="vehicleType"
                     label="Tyyppi"
+                    disabled={isLoading}
                     options={vehicleTypes}
-                    value={formData.typeId?.toString()}
+                    value={formData.type.typeDef}
                     onChange={handleSelectChange}
                />
                <Input
@@ -235,10 +256,11 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                     onChange={handleInputChange}
                />
                <Select
-                    name="primaryFuelId"
+                    name="primaryFuelType"
                     label="Polttoaine"
+                    disabled={isLoading}
                     options={fuelTypes}
-                    value={formData.primaryFuelId?.toString()}
+                    value={formData.primaryFuel.typeDef}
                     onChange={handleSelectChange}
                />
                <DatePicker
@@ -289,14 +311,14 @@ export default function AddOrModifyVechile({ purpose, closeModal, vehicle }: IVe
                          type="button"
                          buttonText="Peruuta"
                          variant="secondary"
-                         disabled={loading}
+                         disabled={isLoading}
                          onClick={resetAndCloseModal}
                     />
                     <Button
                          type="submit"
-                         buttonText={!loading ? "Tallenna" : "Tallentaa"}
+                         buttonText={!isLoading ? "Tallenna" : "Tallentaa"}
                          variant="primary"
-                         disabled={loading}
+                         disabled={isLoading}
                          onClick={handleSubmit}
                     />
                </div>
